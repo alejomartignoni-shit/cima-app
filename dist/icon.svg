@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <!-- Background dark teal -->
+  <rect width="100" height="100" rx="20" fill="#0D1E26"/>
+
+  <!-- Golden teardrop: circle + tip, rendered behind the M -->
+  <circle cx="50" cy="33" r="15" fill="#C49328"/>
+  <polygon points="35,33 65,33 50,56" fill="#C49328"/>
+
+  <!-- Cream M: two pointed triangles with gap in between -->
+  <polygon points="13,78 28,22 44,78" fill="#EDE0C4"/>
+  <polygon points="56,78 72,22 87,78" fill="#EDE0C4"/>
+</svg>
