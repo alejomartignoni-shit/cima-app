@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AppProvider, useApp } from './store/AppContext'
 import { Home } from './pages/Home'
@@ -40,9 +40,9 @@ function AppRoutes() {
 export function App() {
   return (
     <AppProvider>
-      <BrowserRouter>
+      <HashRouter>
         <AppRoutes />
-      </BrowserRouter>
+      </HashRouter>
       <Toaster
         theme="dark"
         position="top-center"
