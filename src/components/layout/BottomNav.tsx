@@ -1,12 +1,12 @@
 import { NavLink } from 'react-router-dom'
-import { Home, ArrowLeftRight, CalendarDays, CheckSquare, ListChecks } from 'lucide-react'
+import { Home, ArrowLeftRight, TrendingUp, CheckSquare, Settings } from 'lucide-react'
 
 const navItems = [
   { to: '/', icon: Home, label: 'Inicio', exact: true },
   { to: '/transacciones', icon: ArrowLeftRight, label: 'Finanzas' },
+  { to: '/proyeccion', icon: TrendingUp, label: 'Millón' },
   { to: '/habitos', icon: CheckSquare, label: 'Hábitos' },
-  { to: '/tareas', icon: ListChecks, label: 'Tareas' },
-  { to: '/semanal', icon: CalendarDays, label: 'Semana' },
+  { to: '/configuracion', icon: Settings, label: 'Config' },
 ]
 
 export function BottomNav() {
@@ -20,13 +20,13 @@ export function BottomNav() {
             end={exact}
             className={({ isActive }) =>
               `flex flex-col items-center gap-1 flex-1 py-2 transition-colors ${
-                isActive ? 'text-emerald-400' : 'text-zinc-500'
+                isActive ? 'text-[#ffd600]' : 'text-zinc-500'
               }`
             }
           >
             {({ isActive }) => (
               <>
-                <Icon size={20} className={isActive ? 'text-emerald-400' : ''} />
+                <Icon size={20} className={isActive ? 'text-[#ffd600]' : ''} />
                 <span className="text-[10px] font-medium">{label}</span>
               </>
             )}

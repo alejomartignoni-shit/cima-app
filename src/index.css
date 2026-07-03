@@ -10,9 +10,19 @@
     color-scheme: dark;
   }
 
+  html.theme-light {
+    background-color: #f2f2f2;
+    color-scheme: light;
+  }
+
   body {
     @apply bg-zinc-950 text-zinc-100 antialiased;
     -webkit-tap-highlight-color: transparent;
+  }
+
+  html.theme-light body {
+    background-color: #f2f2f2;
+    color: #1a1a1a;
   }
 
   * {
@@ -42,3 +52,38 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
+
+/* ─── Light mode overrides ─────────────────────────────────────────────────── */
+html.theme-light .bg-zinc-950 { background-color: #f2f2f2 !important; }
+html.theme-light .bg-zinc-900 { background-color: #ffffff !important; }
+html.theme-light .bg-zinc-800 { background-color: #ebebeb !important; }
+html.theme-light .bg-zinc-700 { background-color: #dcdcdc !important; }
+
+html.theme-light .border-zinc-800,
+html.theme-light .border-zinc-800\/50 { border-color: #e0e0e0 !important; }
+html.theme-light .border-zinc-700 { border-color: #d0d0d0 !important; }
+
+html.theme-light .text-white { color: #1a1a1a !important; }
+html.theme-light .text-zinc-100 { color: #1a1a1a !important; }
+html.theme-light .text-zinc-200 { color: #252525 !important; }
+html.theme-light .text-zinc-300 { color: #333333 !important; }
+html.theme-light .text-zinc-400 { color: #555555 !important; }
+html.theme-light .text-zinc-500 { color: #777777 !important; }
+html.theme-light .text-zinc-600 { color: #999999 !important; }
+
+html.theme-light .divide-zinc-800 > * { border-color: #e0e0e0 !important; }
+html.theme-light .divide-zinc-800\/50 > * { border-color: #e8e8e8 !important; }
+
+html.theme-light .hover\:bg-zinc-800:hover { background-color: #ebebeb !important; }
+html.theme-light .hover\:bg-zinc-700:hover { background-color: #dfdfdf !important; }
+html.theme-light .hover\:border-zinc-700:hover { border-color: #d0d0d0 !important; }
+
+html.theme-light .bg-zinc-950\/80 { background-color: rgba(242,242,242,0.85) !important; }
+html.theme-light .bg-zinc-800\/40 { background-color: rgba(235,235,235,0.7) !important; }
+
+/* Sidebar light mode */
+html.theme-light aside.bg-zinc-900 { background-color: #ffffff !important; border-color: #e0e0e0 !important; }
+
+/* Scrollbar light */
+html.theme-light ::-webkit-scrollbar-track { background: #f2f2f2; }
+html.theme-light ::-webkit-scrollbar-thumb { background: #cccccc; }

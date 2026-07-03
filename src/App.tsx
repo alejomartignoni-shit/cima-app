@@ -1,6 +1,7 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AppProvider, useApp } from './store/AppContext'
+import { ThemeProvider } from './store/ThemeContext'
 import { Home } from './pages/Home'
 import { Transacciones } from './pages/Transacciones'
 import { Racha } from './pages/Racha'
@@ -11,6 +12,7 @@ import { Tareas } from './pages/Tareas'
 import { Semanal } from './pages/Semanal'
 import { Temporada } from './pages/Temporada'
 import { Onboarding } from './pages/Onboarding'
+import { Proyeccion } from './pages/Proyeccion'
 
 function OnboardingGuard({ children }: { children: React.ReactNode }) {
   const { state } = useApp()
@@ -32,6 +34,7 @@ function AppRoutes() {
       <Route path="/tareas" element={<OnboardingGuard><Tareas /></OnboardingGuard>} />
       <Route path="/semanal" element={<OnboardingGuard><Semanal /></OnboardingGuard>} />
       <Route path="/temporada" element={<OnboardingGuard><Temporada /></OnboardingGuard>} />
+      <Route path="/proyeccion" element={<OnboardingGuard><Proyeccion /></OnboardingGuard>} />
       <Route path="/configuracion" element={<OnboardingGuard><Configuracion /></OnboardingGuard>} />
     </Routes>
   )
@@ -39,21 +42,23 @@ function AppRoutes() {
 
 export function App() {
   return (
-    <AppProvider>
-      <HashRouter>
-        <AppRoutes />
-      </HashRouter>
-      <Toaster
-        theme="dark"
-        position="top-center"
-        toastOptions={{
-          style: {
-            background: '#18181b',
-            border: '1px solid #27272a',
-            color: '#f4f4f5',
-          },
-        }}
-      />
-    </AppProvider>
+    <ThemeProvider>
+      <AppProvider>
+        <HashRouter>
+          <AppRoutes />
+        </HashRouter>
+        <Toaster
+          theme="dark"
+          position="top-center"
+          toastOptions={{
+            style: {
+              background: '#18181b',
+              border: '1px solid #27272a',
+              color: '#f4f4f5',
+            },
+          }}
+        />
+      </AppProvider>
+    </ThemeProvider>
   )
 }

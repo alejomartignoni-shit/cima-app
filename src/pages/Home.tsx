@@ -1,6 +1,18 @@
 import { useNavigate } from 'react-router-dom'
 import { AppLayout } from '../components/layout/AppLayout'
-import { TrendingUp, TrendingDown, Wallet, Flame, ArrowUpRight, ArrowDownRight, Minus } from 'lucide-react'
+import {
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  Flame,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
+  Target,
+  Zap,
+  ShieldCheck,
+  BarChart3,
+} from 'lucide-react'
 import { useApp } from '../store/AppContext'
 import { formatearMonto, mesActual, formatearMes, formatearFecha, porcentaje } from '../utils/formatters'
 import { calcularRacha } from '../utils/streakLogic'
@@ -16,21 +28,25 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
+  AreaChart,
+  Area,
 } from 'recharts'
 import { format, subMonths, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 const COLORES_CATEGORIA = [
-  '#10b981', // emerald
-  '#3b82f6', // blue
-  '#f59e0b', // amber
-  '#8b5cf6', // violet
-  '#ef4444', // red
-  '#06b6d4', // cyan
-  '#ec4899', // pink
-  '#84cc16', // lime
-  '#f97316', // orange
+  '#ffd600',
+  '#3b82f6',
+  '#f59e0b',
+  '#8b5cf6',
+  '#ef4444',
+  '#06b6d4',
+  '#ec4899',
+  '#84cc16',
+  '#f97316',
 ]
+
+const META_MILLON = 1_000_000
 
 function mesISO(offset: number): string {
   return format(subMonths(new Date(), offset), 'yyyy-MM')
@@ -38,6 +54,31 @@ function mesISO(offset: number): string {
 
 function mesCorto(mesIso: string): string {
   return format(parseISO(`${mesIso}-01`), 'MMM', { locale: es })
+}
+
+function calcularScoreSalud(
+  ingresos: number,
+  gastos: number,
+  racha: number,
+  totalPresupuestos: number,
+  presupuestosOk: number
+): number {
+  if (ingresos === 0) return 0
+  const tasaAhorro = Math.max(0, (ingresos - gastos) / ingresos)
+  const scoreAhorro = Math.min(40, Math.round(tasaAhorro * 80))
+  const scoreRacha = Math.min(30, Math.round(racha * 1.5))
+  const scorePres =
+    totalPresupuestos > 0
+      ? Math.min(30, Math.round((presupuestosOk / totalPresupuestos) * 30))
+      : 15
+  return scoreAhorro + scoreRacha + scorePres
+}
+
+function labelScore(score: number): { label: string; color: string; bg: string } {
+  if (score >= 80) return { label: 'Excelente 🔥', color: '#ffd600', bg: '#ffd60015' }
+  if (score >= 60) return { label: 'Buena 💪', color: '#10b981', bg: '#10b98115' }
+  if (score >= 40) return { label: 'Regular 📈', color: '#f59e0b', bg: '#f59e0b15' }
+  return { label: 'Necesita atención ⚠️', color: '#f43f5e', bg: '#f43f5e15' }
 }
 
 export function Home() {
@@ -56,6 +97,8 @@ export function Home() {
   const ingresos = txDelMes.filter(t => t.tipo === 'ingreso').reduce((s, t) => s + t.monto, 0)
   const gastos = txDelMes.filter(t => t.tipo === 'gasto').reduce((s, t) => s + t.monto, 0)
   const balance = ingresos - gastos
+  const ahorroNeto = Math.max(0, balance)
+  const tasaAhorro = ingresos > 0 ? Math.round((ahorroNeto / ingresos) * 100) : 0
 
   // Previous month comparison
   const mesPrev = mesISO(1)
@@ -71,19 +114,33 @@ export function Home() {
     ? Math.round(((gastos - gastosPrev) / gastosPrev) * 100)
     : null
 
-  // Spending by category (current month)
+  // Budget health
+  const presupuestosMes = state.presupuestos.filter(p => p.mes === mes)
   const gastosPorCat = txDelMes
     .filter(t => t.tipo === 'gasto')
     .reduce<Record<string, number>>((acc, t) => {
       acc[t.categoria] = (acc[t.categoria] ?? 0) + t.monto
       return acc
     }, {})
+  const presupuestosOk = presupuestosMes.filter(
+    p => (gastosPorCat[p.categoria] ?? 0) <= p.monto
+  ).length
 
-  const pieData = Object.entries(gastosPorCat)
-    .sort((a, b) => b[1] - a[1])
-    .map(([name, value]) => ({ name, value }))
+  // Financial health score
+  const score = calcularScoreSalud(ingresos, gastos, racha, presupuestosMes.length, presupuestosOk)
+  const scoreInfo = labelScore(score)
 
-  // Income by source (current month)
+  // "Camino al Millón" — months at current savings rate to 1M ARS
+  const mesesParaMillon = ahorroNeto > 0 ? Math.ceil(META_MILLON / ahorroNeto) : null
+  const totalAhorrado = state.transacciones
+    .filter(t => t.tipo === 'ingreso')
+    .reduce((s, t) => s + t.monto, 0) -
+    state.transacciones
+      .filter(t => t.tipo === 'gasto')
+      .reduce((s, t) => s + t.monto, 0)
+  const pctHaciaMillon = Math.min(100, Math.max(0, Math.round((totalAhorrado / META_MILLON) * 100)))
+
+  // Income by source
   const ingresosPorCat = txDelMes
     .filter(t => t.tipo === 'ingreso')
     .reduce<Record<string, number>>((acc, t) => {
@@ -91,129 +148,220 @@ export function Home() {
       return acc
     }, {})
 
-  // 6-month bar chart data
+  // 6-month bar chart
   const barData = Array.from({ length: 6 }, (_, i) => {
     const m = mesISO(5 - i)
     const txM = state.transacciones.filter(t => t.fecha.startsWith(m))
+    const ing = txM.filter(t => t.tipo === 'ingreso').reduce((s, t) => s + t.monto, 0)
+    const gst = txM.filter(t => t.tipo === 'gasto').reduce((s, t) => s + t.monto, 0)
     return {
       mes: mesCorto(m),
-      Ingresos: txM.filter(t => t.tipo === 'ingreso').reduce((s, t) => s + t.monto, 0),
-      Gastos: txM.filter(t => t.tipo === 'gasto').reduce((s, t) => s + t.monto, 0),
+      Ingresos: ing,
+      Gastos: gst,
+      Ahorro: Math.max(0, ing - gst),
     }
   })
+
+  // Net savings trend (area chart)
+  const areaData = Array.from({ length: 6 }, (_, i) => {
+    const m = mesISO(5 - i)
+    const txM = state.transacciones.filter(t => t.fecha.startsWith(m))
+    const ing = txM.filter(t => t.tipo === 'ingreso').reduce((s, t) => s + t.monto, 0)
+    const gst = txM.filter(t => t.tipo === 'gasto').reduce((s, t) => s + t.monto, 0)
+    return { mes: mesCorto(m), Ahorro: Math.max(0, ing - gst) }
+  })
+
+  // Pie data
+  const pieData = Object.entries(gastosPorCat)
+    .sort((a, b) => b[1] - a[1])
+    .map(([name, value]) => ({ name, value }))
 
   const hayDatos = state.transacciones.length > 0
 
   return (
-    <AppLayout titulo="Inicio">
-      <div className="space-y-6 animate-fade-in">
+    <AppLayout titulo="Dashboard">
+      <div className="space-y-5 animate-fade-in max-w-5xl">
 
-        {/* Balance hero */}
-        <div>
-          <h2 className="text-zinc-400 text-sm font-medium mb-1">Balance de {formatearMes(mes)}</h2>
-          <p className={`text-4xl font-bold ${balance >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-            {formatearMonto(balance)}
-          </p>
-        </div>
-
-        {/* Rank + Season widget */}
-        <button
-          onClick={() => navigate('/temporada')}
-          className="w-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-xl p-4 flex items-center gap-4 transition-all text-left active:scale-[0.99]"
-        >
-          {/* Rank badge */}
-          <div
-            className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
-            style={{ background: `${rangoInfo.color}18`, border: `1.5px solid ${rangoInfo.color}40` }}
-          >
-            {rangoInfo.emoji}
-          </div>
-
-          {/* Info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-1">
-              <p className="font-semibold text-sm" style={{ color: rangoInfo.color }}>{rangoInfo.rango}</p>
-              <p className="text-zinc-500 text-xs">{temporada.emoji} +{formatXP(xpTemporada)} XP</p>
-            </div>
-            {/* XP bar */}
-            <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{
-                  width: `${progreso.porcentaje}%`,
-                  background: rangoInfo.color,
-                }}
-              />
-            </div>
-            <div className="flex items-center justify-between mt-1">
-              <p className="text-zinc-500 text-xs">{formatXP(state.xp.total)} XP total</p>
-              {progreso.siguiente && (
-                <p className="text-zinc-600 text-xs">
-                  {formatXP(progreso.xpParaSiguiente!)} para {progreso.siguiente.rango}
+        {/* ── Balance hero ── */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-zinc-400 text-xs font-medium mb-1">Balance {formatearMes(mes)}</p>
+              <p className={`text-4xl font-extrabold tracking-tight ${balance >= 0 ? 'text-[#ffd600]' : 'text-rose-400'}`}>
+                {formatearMonto(balance)}
+              </p>
+              {ingresos > 0 && (
+                <p className="text-zinc-500 text-xs mt-1.5">
+                  Tasa de ahorro: <span className="text-zinc-300 font-semibold">{tasaAhorro}%</span>
                 </p>
               )}
             </div>
+            <div className="text-right">
+              <p className="text-zinc-500 text-xs mb-1">Ahorro neto</p>
+              <p className="text-xl font-bold text-emerald-400">{formatearMonto(ahorroNeto)}</p>
+            </div>
           </div>
-        </button>
 
-        {/* KPI cards */}
+          {/* Mini progress to next milestone */}
+          {ahorroNeto > 0 && (
+            <div className="mt-4 pt-4 border-t border-zinc-800">
+              <div className="flex items-center justify-between text-xs mb-1.5">
+                <span className="text-zinc-500 flex items-center gap-1.5">
+                  <Target size={11} className="text-[#ffd600]" />
+                  Camino al Millón
+                </span>
+                <span className="text-zinc-400">{pctHaciaMillon}%</span>
+              </div>
+              <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{ width: `${pctHaciaMillon}%`, background: '#ffd600' }}
+                />
+              </div>
+              {mesesParaMillon !== null && (
+                <p className="text-zinc-600 text-xs mt-1">
+                  A este ritmo: {mesesParaMillon} {mesesParaMillon === 1 ? 'mes' : 'meses'} para $1M
+                </p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* ── Financial Health Score + Rank ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Health Score */}
+          <div
+            className="rounded-2xl p-5 border"
+            style={{ background: scoreInfo.bg, borderColor: `${scoreInfo.color}30` }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <ShieldCheck size={16} style={{ color: scoreInfo.color }} />
+              <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Salud Financiera</p>
+            </div>
+            <div className="flex items-end gap-3">
+              <span className="text-5xl font-extrabold" style={{ color: scoreInfo.color }}>
+                {score}
+              </span>
+              <span className="text-zinc-400 text-sm mb-1">/100</span>
+            </div>
+            <p className="text-sm font-medium mt-1" style={{ color: scoreInfo.color }}>
+              {scoreInfo.label}
+            </p>
+            <div className="mt-3 space-y-1 text-xs text-zinc-500">
+              <div className="flex justify-between">
+                <span>Tasa de ahorro</span>
+                <span className="text-zinc-300">{tasaAhorro}%</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Racha activa</span>
+                <span className="text-zinc-300">{racha} días</span>
+              </div>
+              {presupuestosMes.length > 0 && (
+                <div className="flex justify-between">
+                  <span>Presupuestos en control</span>
+                  <span className="text-zinc-300">{presupuestosOk}/{presupuestosMes.length}</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Rank + Season */}
+          <button
+            onClick={() => navigate('/temporada')}
+            className="w-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-2xl p-5 flex flex-col justify-between text-left active:scale-[0.99] transition-all"
+          >
+            <div className="flex items-center gap-3 mb-3">
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+                style={{ background: `${rangoInfo.color}18`, border: `1.5px solid ${rangoInfo.color}40` }}
+              >
+                {rangoInfo.emoji}
+              </div>
+              <div>
+                <p className="font-bold" style={{ color: rangoInfo.color }}>{rangoInfo.rango}</p>
+                <p className="text-zinc-500 text-xs">{temporada.emoji} {temporada.nombre}</p>
+              </div>
+              <div className="ml-auto text-right">
+                <p className="text-xs text-zinc-500">Esta temporada</p>
+                <p className="font-bold text-[#ffd600] flex items-center gap-1 justify-end">
+                  <Zap size={12} />
+                  +{formatXP(xpTemporada)} XP
+                </p>
+              </div>
+            </div>
+            <div>
+              <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{ width: `${progreso.porcentaje}%`, background: rangoInfo.color }}
+                />
+              </div>
+              <div className="flex justify-between mt-1.5 text-xs">
+                <span className="text-zinc-500">{formatXP(state.xp.total)} XP</span>
+                {progreso.siguiente && (
+                  <span className="text-zinc-600">
+                    {formatXP(progreso.xpParaSiguiente!)} para {progreso.siguiente.rango}
+                  </span>
+                )}
+              </div>
+            </div>
+          </button>
+        </div>
+
+        {/* ── KPI cards ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {/* Ingresos */}
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp size={16} className="text-emerald-400" />
               <span className="text-zinc-400 text-xs">Ingresos</span>
             </div>
-            <p className="text-emerald-400 font-semibold">{formatearMonto(ingresos)}</p>
+            <p className="text-emerald-400 font-bold">{formatearMonto(ingresos)}</p>
             {crecimientoIngresos !== null && (
               <div className={`flex items-center gap-1 mt-1 text-xs ${
                 crecimientoIngresos > 0 ? 'text-emerald-400' : crecimientoIngresos < 0 ? 'text-rose-400' : 'text-zinc-500'
               }`}>
                 {crecimientoIngresos > 0 ? <ArrowUpRight size={11} /> : crecimientoIngresos < 0 ? <ArrowDownRight size={11} /> : <Minus size={11} />}
-                {crecimientoIngresos > 0 ? '+' : ''}{crecimientoIngresos}% vs mes anterior
+                {crecimientoIngresos > 0 ? '+' : ''}{crecimientoIngresos}% vs ant.
               </div>
             )}
           </div>
 
-          {/* Gastos */}
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <TrendingDown size={16} className="text-rose-400" />
               <span className="text-zinc-400 text-xs">Gastos</span>
             </div>
-            <p className="text-rose-400 font-semibold">{formatearMonto(gastos)}</p>
+            <p className="text-rose-400 font-bold">{formatearMonto(gastos)}</p>
             {cambioGastos !== null && (
               <div className={`flex items-center gap-1 mt-1 text-xs ${
                 cambioGastos < 0 ? 'text-emerald-400' : cambioGastos > 0 ? 'text-rose-400' : 'text-zinc-500'
               }`}>
                 {cambioGastos > 0 ? <ArrowUpRight size={11} /> : cambioGastos < 0 ? <ArrowDownRight size={11} /> : <Minus size={11} />}
-                {cambioGastos > 0 ? '+' : ''}{cambioGastos}% vs mes anterior
+                {cambioGastos > 0 ? '+' : ''}{cambioGastos}% vs ant.
               </div>
             )}
           </div>
 
-          {/* Transactions */}
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Wallet size={16} className="text-zinc-400" />
-              <span className="text-zinc-400 text-xs">Transacciones</span>
+              <Wallet size={16} className="text-[#ffd600]" />
+              <span className="text-zinc-400 text-xs">Tasa ahorro</span>
             </div>
-            <p className="text-white font-semibold">{txDelMes.length}</p>
-            <p className="text-zinc-600 text-xs mt-1">este mes</p>
+            <p className="text-[#ffd600] font-bold">{tasaAhorro}%</p>
+            <p className="text-zinc-600 text-xs mt-1">de ingresos</p>
           </div>
 
-          {/* Streak */}
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
-              <Flame size={16} className="text-emerald-400" />
+              <Flame size={16} className="text-[#ffd600]" />
               <span className="text-zinc-400 text-xs">Racha</span>
             </div>
-            <p className="text-emerald-400 font-semibold">{racha} {racha === 1 ? 'día' : 'días'}</p>
+            <p className="text-[#ffd600] font-bold">{racha} {racha === 1 ? 'día' : 'días'}</p>
             <p className="text-zinc-600 text-xs mt-1">consecutivos</p>
           </div>
         </div>
 
-        {/* Empty state */}
+        {/* ── Empty state ── */}
         {!hayDatos && (
           <div className="text-center py-16">
             <div className="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center mx-auto mb-4">
@@ -222,14 +370,98 @@ export function Home() {
             <h3 className="text-white font-medium mb-2">Sin datos todavía</h3>
             <p className="text-zinc-500 text-sm">
               Cargá datos de ejemplo desde{' '}
-              <span className="text-emerald-400">Configuración</span> o agrega una transacción.
+              <span className="text-[#ffd600]">Configuración</span> o agrega una transacción.
             </p>
           </div>
         )}
 
         {hayDatos && (
           <>
-            {/* Business Growth — 6-month bar chart */}
+            {/* ── Millionaire projection widget ── */}
+            <div
+              className="rounded-2xl p-5 border cursor-pointer hover:opacity-90 transition-all"
+              style={{ background: 'linear-gradient(135deg, #ffd60015 0%, #09090b 100%)', borderColor: '#ffd60025' }}
+              onClick={() => navigate('/proyeccion')}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <BarChart3 size={16} className="text-[#ffd600]" />
+                    <span className="text-[#ffd600] text-xs font-semibold uppercase tracking-wide">Proyección</span>
+                  </div>
+                  <h3 className="text-white font-bold text-lg">Tu camino al millón 💰</h3>
+                </div>
+                <ArrowUpRight size={20} className="text-zinc-500" />
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <p className="text-zinc-500 text-xs mb-1">Ahorro mensual</p>
+                  <p className="text-white font-bold text-sm">{formatearMonto(ahorroNeto)}</p>
+                </div>
+                <div>
+                  <p className="text-zinc-500 text-xs mb-1">Meses para $1M</p>
+                  <p className="text-white font-bold text-sm">
+                    {mesesParaMillon !== null ? `${mesesParaMillon} meses` : 'Sin ahorro'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-zinc-500 text-xs mb-1">Progreso</p>
+                  <p className="text-[#ffd600] font-bold text-sm">{pctHaciaMillon}%</p>
+                </div>
+              </div>
+
+              <div className="mt-3">
+                <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${pctHaciaMillon}%`,
+                      background: 'linear-gradient(90deg, #ffd600, #ffaa00)',
+                    }}
+                  />
+                </div>
+              </div>
+              <p className="text-zinc-600 text-xs mt-2 text-right">Ver proyección completa →</p>
+            </div>
+
+            {/* ── Net savings area chart ── */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+              <h3 className="text-zinc-300 font-medium text-sm mb-4">Ahorro neto mensual</h3>
+              <ResponsiveContainer width="100%" height={160}>
+                <AreaChart data={areaData}>
+                  <defs>
+                    <linearGradient id="goldGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#ffd600" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#ffd600" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                  <XAxis dataKey="mes" tick={{ fill: '#71717a', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis
+                    tick={{ fill: '#71717a', fontSize: 10 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={v => v >= 1_000_000 ? `${(v / 1_000_000).toFixed(1)}M` : v >= 1000 ? `${Math.round(v / 1000)}k` : String(v)}
+                    width={42}
+                  />
+                  <Tooltip
+                    contentStyle={{ background: '#18181b', border: '1px solid #27272a', borderRadius: '12px' }}
+                    labelStyle={{ color: '#a1a1aa', fontSize: 11 }}
+                    formatter={(value: number) => [formatearMonto(value), 'Ahorro']}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="Ahorro"
+                    stroke="#ffd600"
+                    strokeWidth={2}
+                    fill="url(#goldGrad)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* ── 6-month evolution bar chart ── */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
               <h3 className="text-zinc-300 font-medium text-sm mb-4">Evolución 6 meses</h3>
               <ResponsiveContainer width="100%" height={200}>
@@ -264,10 +496,12 @@ export function Home() {
               </div>
             </div>
 
-            {/* Business Growth — Income sources */}
+            {/* ── Income sources ── */}
             {Object.keys(ingresosPorCat).length > 0 && (
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-                <h3 className="text-zinc-300 font-medium text-sm mb-4">Fuentes de ingreso — {formatearMes(mes)}</h3>
+                <h3 className="text-zinc-300 font-medium text-sm mb-4">
+                  Fuentes de ingreso — {formatearMes(mes)}
+                </h3>
                 <div className="space-y-3">
                   {Object.entries(ingresosPorCat)
                     .sort((a, b) => b[1] - a[1])
@@ -288,10 +522,7 @@ export function Home() {
                           <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                             <div
                               className="h-full rounded-full"
-                              style={{
-                                width: `${pct}%`,
-                                background: COLORES_CATEGORIA[i % COLORES_CATEGORIA.length],
-                              }}
+                              style={{ width: `${pct}%`, background: COLORES_CATEGORIA[i % COLORES_CATEGORIA.length] }}
                             />
                           </div>
                         </div>
@@ -301,7 +532,7 @@ export function Home() {
               </div>
             )}
 
-            {/* Spending by category — pie + legend */}
+            {/* ── Spending by category ── */}
             {pieData.length > 0 && (
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
                 <h3 className="text-zinc-300 font-medium text-sm mb-4">Gastos por categoría — {formatearMes(mes)}</h3>
@@ -327,7 +558,6 @@ export function Home() {
                       />
                     </PieChart>
                   </div>
-
                   <div className="flex-1 w-full space-y-2">
                     {pieData.map((item, i) => (
                       <div key={item.name} className="flex items-center justify-between gap-2">
@@ -349,7 +579,7 @@ export function Home() {
               </div>
             )}
 
-            {/* Recent transactions */}
+            {/* ── Recent transactions ── */}
             <div>
               <h3 className="text-zinc-300 font-medium mb-3">Últimas transacciones</h3>
               <div className="space-y-2">

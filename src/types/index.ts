@@ -206,7 +206,7 @@ export type AppAction =
   | { type: 'ADD_PRESUPUESTO'; payload: Presupuesto }
   | { type: 'EDIT_PRESUPUESTO'; payload: Presupuesto }
   | { type: 'DELETE_PRESUPUESTO'; payload: string }
-  | { type: 'CARGAR_DEMO'; payload: { transacciones: Transaccion[]; diasActivos: DiaActivo[] } }
+  | { type: 'CARGAR_DEMO'; payload: { transacciones: Transaccion[]; diasActivos: DiaActivo[]; deudas?: Deuda[]; xpEvents?: EventoXP[] } }
   | { type: 'ADD_DIA_ACTIVO'; payload: DiaActivo }
   | { type: 'CHECKIN_HOY'; payload: string }
   | { type: 'DESBLOQUEAR_LOGRO'; payload: Logro }

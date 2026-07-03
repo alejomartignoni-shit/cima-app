@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom'
-import { Home, ArrowLeftRight, Flame, PieChart, Settings, CheckSquare, ListChecks, CalendarDays, Trophy } from 'lucide-react'
+import { Home, ArrowLeftRight, Flame, PieChart, Settings, CheckSquare, ListChecks, CalendarDays, Trophy, TrendingUp, Sun, Moon } from 'lucide-react'
 import { useApp } from '../../store/AppContext'
+import { useTheme } from '../../store/ThemeContext'
 import { calcularRacha } from '../../utils/streakLogic'
 import { getRangoInfo, getProgresoRango, formatXP } from '../../utils/xp'
 
@@ -11,6 +12,7 @@ const navGroups = [
       { to: '/', icon: Home, label: 'Inicio', exact: true },
       { to: '/transacciones', icon: ArrowLeftRight, label: 'Transacciones' },
       { to: '/presupuestos', icon: PieChart, label: 'Presupuestos & Deudas' },
+      { to: '/proyeccion', icon: TrendingUp, label: 'Proyección' },
     ],
   },
   {
@@ -33,6 +35,7 @@ const navGroups = [
 
 export function Sidebar() {
   const { state } = useApp()
+  const { theme, toggleTheme } = useTheme()
   const racha = calcularRacha(state.diasActivos, state.transacciones)
   const rangoInfo = getRangoInfo(state.xp.total)
   const progreso = getProgresoRango(state.xp.total)
@@ -40,20 +43,33 @@ export function Sidebar() {
   return (
     <aside className="hidden lg:flex flex-col w-64 min-h-screen bg-zinc-900 border-r border-zinc-800 fixed left-0 top-0 bottom-0 z-30">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-zinc-800">
-        <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
-          <Flame size={18} className="text-zinc-950" />
+      <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-[#ffd600] flex items-center justify-center">
+            <Flame size={18} className="text-zinc-950" />
+          </div>
+          <span className="text-white font-bold text-lg tracking-tight">CIMA</span>
         </div>
-        <span className="text-white font-bold text-lg tracking-tight">CIMA</span>
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-zinc-800 transition-colors"
+          title={theme === 'dark' ? 'Modo claro' : 'Modo oscuro'}
+        >
+          {theme === 'dark'
+            ? <Sun size={14} className="text-zinc-500" />
+            : <Moon size={14} className="text-zinc-500" />
+          }
+        </button>
       </div>
 
       {/* Streak widget */}
       {racha > 0 && (
-        <div className="mx-4 mt-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+        <div className="mx-4 mt-4 p-3 rounded-xl bg-[#ffd600]/10 border border-[#ffd600]/30">
           <div className="flex items-center gap-2">
-            <Flame size={20} className="text-emerald-400" />
+            <Flame size={20} className="text-[#ffd600]" />
             <div>
-              <div className="text-emerald-400 font-bold text-xl leading-none">{racha}</div>
+              <div className="text-[#ffd600] font-bold text-xl leading-none">{racha}</div>
               <div className="text-zinc-400 text-xs mt-0.5">
                 {racha === 1 ? 'día de racha' : 'días de racha'}
               </div>
@@ -100,14 +116,14 @@ export function Sidebar() {
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                       isActive
-                        ? 'bg-emerald-500/10 text-emerald-400'
+                        ? 'bg-[#ffd600]/10 text-[#ffd600]'
                         : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800'
                     }`
                   }
                 >
                   {({ isActive }) => (
                     <>
-                      <Icon size={18} className={isActive ? 'text-emerald-400' : ''} />
+                      <Icon size={18} className={isActive ? 'text-[#ffd600]' : ''} />
                       {label}
                     </>
                   )}
@@ -120,7 +136,7 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="px-6 py-4 border-t border-zinc-800">
-        <p className="text-zinc-600 text-xs">CIMA v0.2</p>
+        <p className="text-zinc-600 text-xs">CIMA v0.3 · Mentes Millonarias</p>
       </div>
     </aside>
   )

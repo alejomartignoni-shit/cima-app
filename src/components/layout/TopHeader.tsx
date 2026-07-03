@@ -1,5 +1,6 @@
-import { Flame } from 'lucide-react'
+import { Flame, Sun, Moon } from 'lucide-react'
 import { useApp } from '../../store/AppContext'
+import { useTheme } from '../../store/ThemeContext'
 import { calcularRacha } from '../../utils/streakLogic'
 import { formatearFechaLarga, hoy } from '../../utils/formatters'
 
@@ -9,6 +10,7 @@ interface TopHeaderProps {
 
 export function TopHeader({ titulo }: TopHeaderProps) {
   const { state } = useApp()
+  const { theme, toggleTheme } = useTheme()
   const racha = calcularRacha(state.diasActivos, state.transacciones)
 
   return (
@@ -18,11 +20,11 @@ export function TopHeader({ titulo }: TopHeaderProps) {
         <p className="text-zinc-500 text-sm capitalize">{formatearFechaLarga(hoy())}</p>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {racha > 0 ? (
-          <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full">
-            <Flame size={16} className="text-emerald-400" />
-            <span className="text-emerald-400 font-bold text-sm">
+          <div className="flex items-center gap-2 bg-[#ffd600]/10 border border-[#ffd600]/30 px-3 py-1.5 rounded-full">
+            <Flame size={16} className="text-[#ffd600]" />
+            <span className="text-[#ffd600] font-bold text-sm">
               {racha} {racha === 1 ? 'día' : 'días'}
             </span>
           </div>
@@ -32,6 +34,18 @@ export function TopHeader({ titulo }: TopHeaderProps) {
             <span className="text-zinc-500 text-sm">Sin racha</span>
           </div>
         )}
+
+        {/* Theme toggle */}
+        <button
+          onClick={toggleTheme}
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-800 border border-zinc-700 hover:border-zinc-600 hover:bg-zinc-700 transition-all"
+          title={theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+        >
+          {theme === 'dark'
+            ? <Sun size={16} className="text-zinc-400" />
+            : <Moon size={16} className="text-zinc-400" />
+          }
+        </button>
       </div>
     </header>
   )

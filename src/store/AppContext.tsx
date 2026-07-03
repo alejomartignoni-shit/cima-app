@@ -117,12 +117,19 @@ function reducer(state: AppState, action: AppAction): AppState {
         presupuestos: state.presupuestos.filter(p => p.id !== action.payload),
       }
 
-    case 'CARGAR_DEMO':
+    case 'CARGAR_DEMO': {
+      const xpFromDemo = action.payload.xpEvents ?? []
+      const xpTotal = xpFromDemo.reduce((s, e) => s + e.cantidad, 0)
       return {
         ...state,
         transacciones: action.payload.transacciones,
         diasActivos: action.payload.diasActivos,
+        deudas: action.payload.deudas ?? state.deudas,
+        xp: xpFromDemo.length > 0
+          ? { total: xpTotal, historial: xpFromDemo.slice(-100) }
+          : state.xp,
       }
+    }
 
     case 'ADD_DIA_ACTIVO': {
       const existe = state.diasActivos.some(d => d.fecha === action.payload.fecha)

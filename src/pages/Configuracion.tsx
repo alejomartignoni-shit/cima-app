@@ -1,7 +1,7 @@
 import { AppLayout } from '../components/layout/AppLayout'
 import { Settings, Database, Trash2, Download, MonitorDown, CheckCircle } from 'lucide-react'
 import { useApp } from '../store/AppContext'
-import { transaccionesDemo, generarDiasActivosDemo } from '../utils/demoData'
+import { transaccionesDemo, generarDiasActivosDemo, deudasDemo, xpEventosDemo } from '../utils/demoData'
 import { useInstallPrompt } from '../hooks/useInstallPrompt'
 import { toast } from 'sonner'
 
@@ -15,10 +15,12 @@ export function Configuracion() {
       payload: {
         transacciones: transaccionesDemo,
         diasActivos: generarDiasActivosDemo(),
+        deudas: deudasDemo,
+        xpEvents: xpEventosDemo,
       },
     })
     toast.success('¡Datos de ejemplo cargados!', {
-      description: `${transaccionesDemo.length} transacciones con montos reales 2026.`,
+      description: `${transaccionesDemo.length} transacciones · 12 meses de historial · 3 deudas demo`,
     })
   }
 

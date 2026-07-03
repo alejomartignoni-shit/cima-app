@@ -11,6 +11,8 @@ export default {
         zinc: {
           950: '#09090b',
         },
+        gold: '#ffd600',
+        'gold-dark': '#e6c200',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
