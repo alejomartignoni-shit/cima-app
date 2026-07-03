@@ -157,7 +157,7 @@ export interface Deuda {
 
 // ─── Gamification ─────────────────────────────────────────────────────────────
 
-export type Rango = 'Bronce' | 'Plata' | 'Oro' | 'Platino' | 'Diamante' | 'Élite'
+export type Rango = 'Novato' | 'Aprendiz' | 'Bronce' | 'Plata' | 'Oro' | 'Platino' | 'Esmeralda' | 'Zafiro' | 'Diamante' | 'Élite'
 
 export type ObjetivoUsuario = 'ahorrar' | 'controlar' | 'deudas' | 'invertir' | 'libertad'
 
@@ -206,7 +206,20 @@ export type AppAction =
   | { type: 'ADD_PRESUPUESTO'; payload: Presupuesto }
   | { type: 'EDIT_PRESUPUESTO'; payload: Presupuesto }
   | { type: 'DELETE_PRESUPUESTO'; payload: string }
-  | { type: 'CARGAR_DEMO'; payload: { transacciones: Transaccion[]; diasActivos: DiaActivo[]; deudas?: Deuda[]; xpEvents?: EventoXP[] } }
+  | { type: 'CARGAR_DEMO'; payload: {
+      transacciones: Transaccion[]
+      diasActivos: DiaActivo[]
+      deudas?: Deuda[]
+      xpEvents?: EventoXP[]
+      habitos?: Habito[]
+      registrosHabito?: RegistroHabito[]
+      estadosDia?: EstadoDia[]
+      tareas?: Tarea[]
+      registrosSemanal?: RegistroSemanal[]
+      perfil?: PerfilUsuario
+      ultimoCheckIn?: string
+      presupuestos?: Presupuesto[]
+    } }
   | { type: 'ADD_DIA_ACTIVO'; payload: DiaActivo }
   | { type: 'CHECKIN_HOY'; payload: string }
   | { type: 'DESBLOQUEAR_LOGRO'; payload: Logro }

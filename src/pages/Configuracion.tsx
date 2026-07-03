@@ -1,7 +1,11 @@
 import { AppLayout } from '../components/layout/AppLayout'
 import { Settings, Database, Trash2, Download, MonitorDown, CheckCircle } from 'lucide-react'
 import { useApp } from '../store/AppContext'
-import { transaccionesDemo, generarDiasActivosDemo, deudasDemo, xpEventosDemo } from '../utils/demoData'
+import {
+  transaccionesDemo, generarDiasActivosDemo, deudasDemo, xpEventosDemo,
+  habitosDemo, registrosHabitoDemo, estadosDiaDemo, tareasDemo,
+  registrosSemanalesDemo, perfilDemo, presupuestosDemo,
+} from '../utils/demoData'
 import { useInstallPrompt } from '../hooks/useInstallPrompt'
 import { toast } from 'sonner'
 
@@ -17,10 +21,18 @@ export function Configuracion() {
         diasActivos: generarDiasActivosDemo(),
         deudas: deudasDemo,
         xpEvents: xpEventosDemo,
+        habitos: habitosDemo,
+        registrosHabito: registrosHabitoDemo,
+        estadosDia: estadosDiaDemo,
+        tareas: tareasDemo,
+        registrosSemanal: registrosSemanalesDemo,
+        perfil: perfilDemo,
+        ultimoCheckIn: new Date().toISOString().split('T')[0],
+        presupuestos: presupuestosDemo,
       },
     })
     toast.success('¡Datos de ejemplo cargados!', {
-      description: `${transaccionesDemo.length} transacciones · 12 meses de historial · 3 deudas demo`,
+      description: `Rango Élite · Racha 91 días · 6 hábitos · ${tareasDemo.length} tareas`,
     })
   }
 

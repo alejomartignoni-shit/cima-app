@@ -125,6 +125,14 @@ function reducer(state: AppState, action: AppAction): AppState {
         transacciones: action.payload.transacciones,
         diasActivos: action.payload.diasActivos,
         deudas: action.payload.deudas ?? state.deudas,
+        presupuestos: action.payload.presupuestos ?? state.presupuestos,
+        habitos: action.payload.habitos ?? state.habitos,
+        registrosHabito: action.payload.registrosHabito ?? state.registrosHabito,
+        estadosDia: action.payload.estadosDia ?? state.estadosDia,
+        tareas: action.payload.tareas ?? state.tareas,
+        registrosSemanal: action.payload.registrosSemanal ?? state.registrosSemanal,
+        perfil: action.payload.perfil ?? state.perfil,
+        ultimoCheckIn: action.payload.ultimoCheckIn ?? state.ultimoCheckIn,
         xp: xpFromDemo.length > 0
           ? { total: xpTotal, historial: xpFromDemo.slice(-100) }
           : state.xp,

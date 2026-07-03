@@ -14,7 +14,7 @@ import {
   Tooltip,
   Legend,
 } from 'recharts'
-import { format, addMonths } from 'date-fns'
+import { format, addMonths, subMonths } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 const METAS = [
@@ -68,7 +68,12 @@ export function Proyeccion() {
   const [mostrarSelector, setMostrarSelector] = useState(false)
 
   const mes = mesActual()
-  const txDelMes = state.transacciones.filter(t => t.fecha.startsWith(mes))
+  const txDelMesCurrent = state.transacciones.filter(t => t.fecha.startsWith(mes))
+  // Fall back to previous month when current month has < 5 transactions
+  const mesPrevStr = format(subMonths(new Date(), 1), 'yyyy-MM')
+  const txDelMes = txDelMesCurrent.length >= 5
+    ? txDelMesCurrent
+    : state.transacciones.filter(t => t.fecha.startsWith(mesPrevStr))
   const ingresos = txDelMes.filter(t => t.tipo === 'ingreso').reduce((s, t) => s + t.monto, 0)
   const gastos = txDelMes.filter(t => t.tipo === 'gasto').reduce((s, t) => s + t.monto, 0)
   const ahorroNeto = Math.max(0, ingresos - gastos)

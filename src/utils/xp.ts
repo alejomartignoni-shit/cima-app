@@ -12,12 +12,16 @@ export interface InfoRango {
 }
 
 export const RANGOS: InfoRango[] = [
-  { rango: 'Bronce',   emoji: '🥉', color: '#cd7f32', minXP: 0,     maxXP: 499   },
-  { rango: 'Plata',    emoji: '🥈', color: '#a8a9ad', minXP: 500,   maxXP: 1999  },
-  { rango: 'Oro',      emoji: '🥇', color: '#ffd700', minXP: 2000,  maxXP: 4999  },
-  { rango: 'Platino',  emoji: '💎', color: '#00b4d8', minXP: 5000,  maxXP: 9999  },
-  { rango: 'Diamante', emoji: '💠', color: '#a855f7', minXP: 10000, maxXP: 19999 },
-  { rango: 'Élite',    emoji: '👑', color: '#10b981', minXP: 20000, maxXP: null  },
+  { rango: 'Novato',    emoji: '🔰', color: '#71717a', minXP: 0,     maxXP: 99    },
+  { rango: 'Aprendiz',  emoji: '📗', color: '#84cc16', minXP: 100,   maxXP: 299   },
+  { rango: 'Bronce',    emoji: '🥉', color: '#cd7f32', minXP: 300,   maxXP: 699   },
+  { rango: 'Plata',     emoji: '🥈', color: '#a8a9ad', minXP: 700,   maxXP: 1499  },
+  { rango: 'Oro',       emoji: '🥇', color: '#ffd700', minXP: 1500,  maxXP: 2999  },
+  { rango: 'Platino',   emoji: '💎', color: '#e2e8f0', minXP: 3000,  maxXP: 5999  },
+  { rango: 'Esmeralda', emoji: '💚', color: '#10b981', minXP: 6000,  maxXP: 9999  },
+  { rango: 'Zafiro',    emoji: '💙', color: '#3b82f6', minXP: 10000, maxXP: 14999 },
+  { rango: 'Diamante',  emoji: '💠', color: '#a855f7', minXP: 15000, maxXP: 19999 },
+  { rango: 'Élite',     emoji: '👑', color: '#ffd600', minXP: 20000, maxXP: null  },
 ]
 
 export function getRangoInfo(xpTotal: number): InfoRango {

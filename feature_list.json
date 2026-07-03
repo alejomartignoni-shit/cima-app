@@ -1,0 +1,67 @@
+{
+  "features": [
+    {
+      "id": "feat-001",
+      "name": "Core app shell (layout + routing + state)",
+      "description": "AppLayout, Sidebar, BottomNav, TopHeader. React Router v6 con 9 rutas. AppContext + useReducer + localStorage sync (key: cima-v1).",
+      "status": "done",
+      "evidence": "Archivos existentes: AppLayout.tsx, AppContext.tsx, store/."
+    },
+    {
+      "id": "feat-002",
+      "name": "Transacciones — CRUD completo",
+      "description": "Lista, agregar, editar, eliminar transacciones. Tipos: ingreso/gasto. Categorías. Formato ARS con formatearMonto().",
+      "status": "unknown",
+      "evidence": "Transacciones.tsx existe — verificar si CRUD está completo."
+    },
+    {
+      "id": "feat-003",
+      "name": "Sistema de Racha (streak)",
+      "description": "calcularRacha, calcularRachaMaxima, ultimos30Dias en streakLogic.ts. Check-in diario. Logros desbloqueables.",
+      "status": "unknown",
+      "evidence": "Racha.tsx + streakLogic.ts existen."
+    },
+    {
+      "id": "feat-004",
+      "name": "Presupuestos por categoría/mes",
+      "description": "Crear presupuesto para una categoría de gasto en un mes. Barra de progreso vs gasto real.",
+      "status": "unknown",
+      "evidence": "Presupuestos.tsx existe."
+    },
+    {
+      "id": "feat-005",
+      "name": "Home dashboard",
+      "description": "Balance del mes, resumen ingresos/gastos, accesos rápidos, racha actual.",
+      "status": "unknown",
+      "evidence": "Home.tsx existe."
+    },
+    {
+      "id": "feat-006",
+      "name": "Habitos, Tareas, Temporada, Semanal",
+      "description": "Páginas adicionales más allá del PRD original: Habitos.tsx, Tareas.tsx, Temporada.tsx, Semanal.tsx.",
+      "status": "unknown",
+      "evidence": "Archivos existen — scope expandido desde RachaFin original."
+    },
+    {
+      "id": "feat-007",
+      "name": "Onboarding",
+      "description": "Flujo de onboarding para nuevos usuarios. Onboarding.tsx.",
+      "status": "unknown",
+      "evidence": "Onboarding.tsx existe."
+    },
+    {
+      "id": "feat-008",
+      "name": "PWA + install prompt",
+      "description": "public/manifest.json, useInstallPrompt hook para A2HS en mobile.",
+      "status": "unknown",
+      "evidence": "useInstallPrompt.ts + manifest.json referenciado en CLAUDE.md."
+    },
+    {
+      "id": "feat-009",
+      "name": "XP / gamification layer",
+      "description": "utils/xp.ts — sistema de puntos de experiencia.",
+      "status": "unknown",
+      "evidence": "xp.ts existe — no documentado en CLAUDE.md original."
+    }
+  ]
+}

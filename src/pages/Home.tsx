@@ -4,7 +4,6 @@ import {
   TrendingUp,
   TrendingDown,
   Wallet,
-  Flame,
   ArrowUpRight,
   ArrowDownRight,
   Minus,
@@ -15,8 +14,8 @@ import {
 } from 'lucide-react'
 import { useApp } from '../store/AppContext'
 import { formatearMonto, mesActual, formatearMes, formatearFecha, porcentaje } from '../utils/formatters'
-import { calcularRacha } from '../utils/streakLogic'
-import { getRangoInfo, getProgresoRango, getTemporadaActual, getXPTemporada, formatXP } from '../utils/xp'
+import { calcularRacha, calcularRachaMaxima, obtenerUltimos30Dias } from '../utils/streakLogic'
+import { getRangoInfo, getProgresoRango, getTemporadaActual, getXPTemporada, formatXP, RANGOS } from '../utils/xp'
 import {
   ResponsiveContainer,
   PieChart,
@@ -35,15 +34,8 @@ import { format, subMonths, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 const COLORES_CATEGORIA = [
-  '#ffd600',
-  '#3b82f6',
-  '#f59e0b',
-  '#8b5cf6',
-  '#ef4444',
-  '#06b6d4',
-  '#ec4899',
-  '#84cc16',
-  '#f97316',
+  '#ffd600', '#3b82f6', '#f59e0b', '#8b5cf6',
+  '#ef4444', '#06b6d4', '#ec4899', '#84cc16', '#f97316',
 ]
 
 const META_MILLON = 1_000_000
@@ -86,14 +78,25 @@ export function Home() {
   const navigate = useNavigate()
   const mes = mesActual()
   const racha = calcularRacha(state.diasActivos, state.transacciones)
+  const rachaMaxima = calcularRachaMaxima(state.diasActivos, state.transacciones)
+  const ultimos30Dias = obtenerUltimos30Dias(state.diasActivos, state.transacciones)
+  const totalDiasActivos = new Set([
+    ...state.diasActivos.map(d => d.fecha),
+    ...state.transacciones.map(t => t.fecha),
+  ]).size
 
   const temporada = getTemporadaActual()
   const rangoInfo = getRangoInfo(state.xp.total)
   const progreso = getProgresoRango(state.xp.total)
   const xpTemporada = getXPTemporada(state.xp, temporada)
 
-  // Current month
-  const txDelMes = state.transacciones.filter(t => t.fecha.startsWith(mes))
+  // Current month — fall back to prev month if barely any data
+  const txDelMesCurrent = state.transacciones.filter(t => t.fecha.startsWith(mes))
+  const mesRef = txDelMesCurrent.length >= 5 ? mes : mesISO(1)
+  const txDelMes = txDelMesCurrent.length >= 5
+    ? txDelMesCurrent
+    : state.transacciones.filter(t => t.fecha.startsWith(mesISO(1)))
+
   const ingresos = txDelMes.filter(t => t.tipo === 'ingreso').reduce((s, t) => s + t.monto, 0)
   const gastos = txDelMes.filter(t => t.tipo === 'gasto').reduce((s, t) => s + t.monto, 0)
   const balance = ingresos - gastos
@@ -101,7 +104,7 @@ export function Home() {
   const tasaAhorro = ingresos > 0 ? Math.round((ahorroNeto / ingresos) * 100) : 0
 
   // Previous month comparison
-  const mesPrev = mesISO(1)
+  const mesPrev = mesRef === mes ? mesISO(1) : mesISO(2)
   const txMesPrev = state.transacciones.filter(t => t.fecha.startsWith(mesPrev))
   const ingresosPrev = txMesPrev.filter(t => t.tipo === 'ingreso').reduce((s, t) => s + t.monto, 0)
   const gastosPrev = txMesPrev.filter(t => t.tipo === 'gasto').reduce((s, t) => s + t.monto, 0)
@@ -109,13 +112,12 @@ export function Home() {
   const crecimientoIngresos = ingresosPrev > 0
     ? Math.round(((ingresos - ingresosPrev) / ingresosPrev) * 100)
     : null
-
   const cambioGastos = gastosPrev > 0
     ? Math.round(((gastos - gastosPrev) / gastosPrev) * 100)
     : null
 
   // Budget health
-  const presupuestosMes = state.presupuestos.filter(p => p.mes === mes)
+  const presupuestosMes = state.presupuestos.filter(p => p.mes === mesRef)
   const gastosPorCat = txDelMes
     .filter(t => t.tipo === 'gasto')
     .reduce<Record<string, number>>((acc, t) => {
@@ -126,18 +128,15 @@ export function Home() {
     p => (gastosPorCat[p.categoria] ?? 0) <= p.monto
   ).length
 
-  // Financial health score
   const score = calcularScoreSalud(ingresos, gastos, racha, presupuestosMes.length, presupuestosOk)
   const scoreInfo = labelScore(score)
 
-  // "Camino al Millón" — months at current savings rate to 1M ARS
+  // Camino al Millón
   const mesesParaMillon = ahorroNeto > 0 ? Math.ceil(META_MILLON / ahorroNeto) : null
   const totalAhorrado = state.transacciones
-    .filter(t => t.tipo === 'ingreso')
-    .reduce((s, t) => s + t.monto, 0) -
+    .filter(t => t.tipo === 'ingreso').reduce((s, t) => s + t.monto, 0) -
     state.transacciones
-      .filter(t => t.tipo === 'gasto')
-      .reduce((s, t) => s + t.monto, 0)
+      .filter(t => t.tipo === 'gasto').reduce((s, t) => s + t.monto, 0)
   const pctHaciaMillon = Math.min(100, Math.max(0, Math.round((totalAhorrado / META_MILLON) * 100)))
 
   // Income by source
@@ -154,15 +153,10 @@ export function Home() {
     const txM = state.transacciones.filter(t => t.fecha.startsWith(m))
     const ing = txM.filter(t => t.tipo === 'ingreso').reduce((s, t) => s + t.monto, 0)
     const gst = txM.filter(t => t.tipo === 'gasto').reduce((s, t) => s + t.monto, 0)
-    return {
-      mes: mesCorto(m),
-      Ingresos: ing,
-      Gastos: gst,
-      Ahorro: Math.max(0, ing - gst),
-    }
+    return { mes: mesCorto(m), Ingresos: ing, Gastos: gst }
   })
 
-  // Net savings trend (area chart)
+  // Net savings trend
   const areaData = Array.from({ length: 6 }, (_, i) => {
     const m = mesISO(5 - i)
     const txM = state.transacciones.filter(t => t.fecha.startsWith(m))
@@ -186,7 +180,7 @@ export function Home() {
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-zinc-400 text-xs font-medium mb-1">Balance {formatearMes(mes)}</p>
+              <p className="text-zinc-400 text-xs font-medium mb-1">Balance {formatearMes(mesRef)}</p>
               <p className={`text-4xl font-extrabold tracking-tight ${balance >= 0 ? 'text-[#ffd600]' : 'text-rose-400'}`}>
                 {formatearMonto(balance)}
               </p>
@@ -202,7 +196,6 @@ export function Home() {
             </div>
           </div>
 
-          {/* Mini progress to next milestone */}
           {ahorroNeto > 0 && (
             <div className="mt-4 pt-4 border-t border-zinc-800">
               <div className="flex items-center justify-between text-xs mb-1.5">
@@ -227,50 +220,44 @@ export function Home() {
           )}
         </div>
 
-        {/* ── Financial Health Score + Rank ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* Health Score */}
-          <div
-            className="rounded-2xl p-5 border"
-            style={{ background: scoreInfo.bg, borderColor: `${scoreInfo.color}30` }}
-          >
-            <div className="flex items-center gap-2 mb-3">
+        {/* ── Health Score ── */}
+        <div
+          className="rounded-2xl p-5 border"
+          style={{ background: scoreInfo.bg, borderColor: `${scoreInfo.color}30` }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 mb-0">
               <ShieldCheck size={16} style={{ color: scoreInfo.color }} />
               <p className="text-xs font-semibold text-zinc-400 uppercase tracking-wide">Salud Financiera</p>
             </div>
-            <div className="flex items-end gap-3">
-              <span className="text-5xl font-extrabold" style={{ color: scoreInfo.color }}>
-                {score}
-              </span>
-              <span className="text-zinc-400 text-sm mb-1">/100</span>
-            </div>
-            <p className="text-sm font-medium mt-1" style={{ color: scoreInfo.color }}>
-              {scoreInfo.label}
-            </p>
-            <div className="mt-3 space-y-1 text-xs text-zinc-500">
-              <div className="flex justify-between">
-                <span>Tasa de ahorro</span>
-                <span className="text-zinc-300">{tasaAhorro}%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Racha activa</span>
-                <span className="text-zinc-300">{racha} días</span>
-              </div>
-              {presupuestosMes.length > 0 && (
-                <div className="flex justify-between">
-                  <span>Presupuestos en control</span>
-                  <span className="text-zinc-300">{presupuestosOk}/{presupuestosMes.length}</span>
-                </div>
-              )}
-            </div>
+            <span className="text-xs font-medium" style={{ color: scoreInfo.color }}>{scoreInfo.label}</span>
           </div>
+          <div className="flex items-end gap-3 mt-2">
+            <span className="text-5xl font-extrabold" style={{ color: scoreInfo.color }}>{score}</span>
+            <span className="text-zinc-400 text-sm mb-1">/100</span>
+          </div>
+          <div className="mt-3 grid grid-cols-3 gap-3 text-xs text-zinc-500">
+            <div className="flex flex-col gap-0.5">
+              <span>Tasa de ahorro</span>
+              <span className="text-zinc-300 font-semibold">{tasaAhorro}%</span>
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <span>Racha activa</span>
+              <span className="text-zinc-300 font-semibold">{racha} días</span>
+            </div>
+            {presupuestosMes.length > 0 && (
+              <div className="flex flex-col gap-0.5">
+                <span>Presupuestos OK</span>
+                <span className="text-zinc-300 font-semibold">{presupuestosOk}/{presupuestosMes.length}</span>
+              </div>
+            )}
+          </div>
+        </div>
 
-          {/* Rank + Season */}
-          <button
-            onClick={() => navigate('/temporada')}
-            className="w-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 rounded-2xl p-5 flex flex-col justify-between text-left active:scale-[0.99] transition-all"
-          >
-            <div className="flex items-center gap-3 mb-3">
+        {/* ── Rank + Season ── */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
               <div
                 className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
                 style={{ background: `${rangoInfo.color}18`, border: `1.5px solid ${rangoInfo.color}40` }}
@@ -278,38 +265,107 @@ export function Home() {
                 {rangoInfo.emoji}
               </div>
               <div>
-                <p className="font-bold" style={{ color: rangoInfo.color }}>{rangoInfo.rango}</p>
+                <p className="font-bold text-lg" style={{ color: rangoInfo.color }}>{rangoInfo.rango}</p>
                 <p className="text-zinc-500 text-xs">{temporada.emoji} {temporada.nombre}</p>
               </div>
-              <div className="ml-auto text-right">
-                <p className="text-xs text-zinc-500">Esta temporada</p>
-                <p className="font-bold text-[#ffd600] flex items-center gap-1 justify-end">
-                  <Zap size={12} />
-                  +{formatXP(xpTemporada)} XP
-                </p>
-              </div>
             </div>
-            <div>
-              <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+            <div className="text-right">
+              <p className="text-xs text-zinc-500">Esta temporada</p>
+              <p className="font-bold text-[#ffd600] flex items-center gap-1 justify-end text-sm">
+                <Zap size={12} />
+                +{formatXP(xpTemporada)} XP
+              </p>
+              <p className="text-zinc-600 text-xs mt-0.5">{formatXP(state.xp.total)} XP total</p>
+            </div>
+          </div>
+
+          {/* XP progress bar */}
+          <div className="mb-4">
+            <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{ width: `${progreso.porcentaje}%`, background: rangoInfo.color }}
+              />
+            </div>
+            <div className="flex justify-between mt-1.5 text-xs">
+              <span className="text-zinc-500">{formatXP(state.xp.total)} XP</span>
+              {progreso.siguiente
+                ? <span className="text-zinc-600">{formatXP(progreso.xpParaSiguiente!)} para {progreso.siguiente.rango} {progreso.siguiente.emoji}</span>
+                : <span className="text-[#ffd600] font-semibold">Rango Máximo 👑</span>
+              }
+            </div>
+          </div>
+
+          {/* Full rank ladder */}
+          <div className="grid grid-cols-5 gap-1.5">
+            {RANGOS.map(r => {
+              const alcanzado = state.xp.total >= r.minXP
+              const esCurrent = rangoInfo.rango === r.rango
+              return (
                 <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{ width: `${progreso.porcentaje}%`, background: rangoInfo.color }}
-                />
-              </div>
-              <div className="flex justify-between mt-1.5 text-xs">
-                <span className="text-zinc-500">{formatXP(state.xp.total)} XP</span>
-                {progreso.siguiente && (
-                  <span className="text-zinc-600">
-                    {formatXP(progreso.xpParaSiguiente!)} para {progreso.siguiente.rango}
+                  key={r.rango}
+                  className={`flex flex-col items-center gap-1 p-2 rounded-xl border text-center transition-all ${
+                    esCurrent
+                      ? 'border-current'
+                      : alcanzado
+                      ? 'border-zinc-700 bg-zinc-800/30'
+                      : 'border-zinc-800/50 opacity-40'
+                  }`}
+                  style={esCurrent ? { borderColor: `${r.color}60`, background: `${r.color}10` } : {}}
+                >
+                  <span className="text-lg">{r.emoji}</span>
+                  <span
+                    className="text-[10px] font-semibold leading-tight"
+                    style={{ color: esCurrent ? r.color : alcanzado ? '#a1a1aa' : '#52525b' }}
+                  >
+                    {r.rango}
                   </span>
-                )}
-              </div>
-            </div>
+                  <span className="text-[9px] text-zinc-600">
+                    {r.maxXP ? `${formatXP(r.minXP)}` : `${formatXP(r.minXP)}+`}
+                  </span>
+                  {alcanzado && (
+                    <div
+                      className="w-1.5 h-1.5 rounded-full"
+                      style={{ background: r.color }}
+                    />
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          <button
+            onClick={() => navigate('/proyeccion')}
+            className="mt-3 w-full text-xs text-zinc-600 hover:text-zinc-400 transition-colors text-center"
+          >
+            Ver proyección completa →
           </button>
         </div>
 
+        {/* ── Compact activity streak ── */}
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-zinc-300 text-sm font-medium">Actividad — últimos 30 días</p>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="text-zinc-500">Racha: <span className="text-[#ffd600] font-bold">{racha}d</span></span>
+              <span className="text-zinc-500">Máx: <span className="text-zinc-300 font-semibold">{rachaMaxima}d</span></span>
+              <span className="text-zinc-500">Total: <span className="text-zinc-300 font-semibold">{totalDiasActivos}d</span></span>
+            </div>
+          </div>
+          <div className="grid grid-cols-15 gap-1" style={{ gridTemplateColumns: 'repeat(15, minmax(0, 1fr))' }}>
+            {ultimos30Dias.map(({ fecha, activo }) => (
+              <div
+                key={fecha}
+                title={fecha}
+                className={`h-4 rounded-sm transition-all ${activo ? '' : 'bg-zinc-800'}`}
+                style={activo ? { background: '#ffd600', opacity: 0.85 } : {}}
+              />
+            ))}
+          </div>
+        </div>
+
         {/* ── KPI cards ── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp size={16} className="text-emerald-400" />
@@ -349,15 +405,6 @@ export function Home() {
             </div>
             <p className="text-[#ffd600] font-bold">{tasaAhorro}%</p>
             <p className="text-zinc-600 text-xs mt-1">de ingresos</p>
-          </div>
-
-          <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Flame size={16} className="text-[#ffd600]" />
-              <span className="text-zinc-400 text-xs">Racha</span>
-            </div>
-            <p className="text-[#ffd600] font-bold">{racha} {racha === 1 ? 'día' : 'días'}</p>
-            <p className="text-zinc-600 text-xs mt-1">consecutivos</p>
           </div>
         </div>
 
@@ -402,7 +449,7 @@ export function Home() {
                 <div>
                   <p className="text-zinc-500 text-xs mb-1">Meses para $1M</p>
                   <p className="text-white font-bold text-sm">
-                    {mesesParaMillon !== null ? `${mesesParaMillon} meses` : 'Sin ahorro'}
+                    {mesesParaMillon !== null ? `${mesesParaMillon} meses` : '—'}
                   </p>
                 </div>
                 <div>
@@ -415,10 +462,7 @@ export function Home() {
                 <div className="h-1.5 bg-zinc-800 rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full"
-                    style={{
-                      width: `${pctHaciaMillon}%`,
-                      background: 'linear-gradient(90deg, #ffd600, #ffaa00)',
-                    }}
+                    style={{ width: `${pctHaciaMillon}%`, background: 'linear-gradient(90deg, #ffd600, #ffaa00)' }}
                   />
                 </div>
               </div>
@@ -450,13 +494,7 @@ export function Home() {
                     labelStyle={{ color: '#a1a1aa', fontSize: 11 }}
                     formatter={(value: number) => [formatearMonto(value), 'Ahorro']}
                   />
-                  <Area
-                    type="monotone"
-                    dataKey="Ahorro"
-                    stroke="#ffd600"
-                    strokeWidth={2}
-                    fill="url(#goldGrad)"
-                  />
+                  <Area type="monotone" dataKey="Ahorro" stroke="#ffd600" strokeWidth={2} fill="url(#goldGrad)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -500,7 +538,7 @@ export function Home() {
             {Object.keys(ingresosPorCat).length > 0 && (
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
                 <h3 className="text-zinc-300 font-medium text-sm mb-4">
-                  Fuentes de ingreso — {formatearMes(mes)}
+                  Fuentes de ingreso — {formatearMes(mesRef)}
                 </h3>
                 <div className="space-y-3">
                   {Object.entries(ingresosPorCat)
@@ -535,19 +573,11 @@ export function Home() {
             {/* ── Spending by category ── */}
             {pieData.length > 0 && (
               <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
-                <h3 className="text-zinc-300 font-medium text-sm mb-4">Gastos por categoría — {formatearMes(mes)}</h3>
+                <h3 className="text-zinc-300 font-medium text-sm mb-4">Gastos por categoría — {formatearMes(mesRef)}</h3>
                 <div className="flex flex-col sm:flex-row items-center gap-6">
                   <div className="flex-shrink-0">
                     <PieChart width={160} height={160}>
-                      <Pie
-                        data={pieData}
-                        cx={75}
-                        cy={75}
-                        innerRadius={45}
-                        outerRadius={72}
-                        paddingAngle={2}
-                        dataKey="value"
-                      >
+                      <Pie data={pieData} cx={75} cy={75} innerRadius={45} outerRadius={72} paddingAngle={2} dataKey="value">
                         {pieData.map((_, i) => (
                           <Cell key={i} fill={COLORES_CATEGORIA[i % COLORES_CATEGORIA.length]} />
                         ))}
@@ -562,10 +592,7 @@ export function Home() {
                     {pieData.map((item, i) => (
                       <div key={item.name} className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0">
-                          <div
-                            className="w-2 h-2 rounded-full flex-shrink-0"
-                            style={{ background: COLORES_CATEGORIA[i % COLORES_CATEGORIA.length] }}
-                          />
+                          <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: COLORES_CATEGORIA[i % COLORES_CATEGORIA.length] }} />
                           <span className="text-zinc-400 text-xs truncate">{item.name}</span>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
