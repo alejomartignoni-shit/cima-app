@@ -1,7 +1,24 @@
+import { Component, type ReactNode } from 'react'
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AppProvider, useApp } from './store/AppContext'
 import { ThemeProvider } from './store/ThemeContext'
+
+class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
+  state = { error: null }
+  static getDerivedStateFromError(error: Error) { return { error } }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ padding: 24, color: '#f87171', fontFamily: 'monospace', background: '#09090b', minHeight: '100vh' }}>
+          <h2 style={{ color: '#fbbf24', marginBottom: 12 }}>Runtime Error</h2>
+          <pre style={{ whiteSpace: 'pre-wrap', fontSize: 13 }}>{String(this.state.error)}</pre>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
 import { Home } from './pages/Home'
 import { Transacciones } from './pages/Transacciones'
 import { Racha } from './pages/Racha'
@@ -42,10 +59,13 @@ function AppRoutes() {
 
 export function App() {
   return (
+    <ErrorBoundary>
     <ThemeProvider>
       <AppProvider>
         <HashRouter>
+          <ErrorBoundary>
           <AppRoutes />
+          </ErrorBoundary>
         </HashRouter>
         <Toaster
           theme="dark"
@@ -60,5 +80,6 @@ export function App() {
         />
       </AppProvider>
     </ThemeProvider>
+    </ErrorBoundary>
   )
 }
