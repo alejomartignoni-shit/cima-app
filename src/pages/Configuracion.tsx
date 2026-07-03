@@ -4,7 +4,7 @@ import { useApp } from '../store/AppContext'
 import {
   transaccionesDemo, generarDiasActivosDemo, deudasDemo, xpEventosDemo,
   habitosDemo, registrosHabitoDemo, estadosDiaDemo, tareasDemo,
-  registrosSemanalesDemo, perfilDemo, presupuestosDemo,
+  registrosSemanalesDemo, perfilDemo, presupuestosDemo, dashboardsDemo,
 } from '../utils/demoData'
 import { useInstallPrompt } from '../hooks/useInstallPrompt'
 import { toast } from 'sonner'
@@ -29,6 +29,7 @@ export function Configuracion() {
         perfil: perfilDemo,
         ultimoCheckIn: new Date().toISOString().split('T')[0],
         presupuestos: presupuestosDemo,
+        dashboards: dashboardsDemo,
       },
     })
     toast.success('¡Datos de ejemplo cargados!', {

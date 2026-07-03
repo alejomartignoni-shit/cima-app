@@ -125,6 +125,7 @@ export interface Tarea {
   estado: EstadoTarea
   categoria: CategoriaTarea
   creadaEn: string // YYYY-MM-DD
+  tags?: string[]
 }
 
 // ─── Weekly planner ───────────────────────────────────────────────────────────
@@ -153,6 +154,27 @@ export interface Deuda {
   tasaInteres?: number // annual %
   fechaVencimiento?: string // YYYY-MM-DD
   cuotaMensual?: number
+}
+
+// ─── Dashboards ───────────────────────────────────────────────────────────────
+
+export type WidgetType =
+  | 'kpi_balance' | 'kpi_ingresos' | 'kpi_gastos' | 'kpi_ahorro'
+  | 'kpi_racha' | 'kpi_xp' | 'kpi_deuda' | 'kpi_tareas'
+  | 'chart_bar_6meses' | 'chart_area_ahorro' | 'chart_pie_gastos'
+  | 'chart_habits' | 'camino_millon' | 'recent_tx' | 'task_progress'
+
+export interface Widget {
+  id: string
+  type: WidgetType
+  titulo?: string
+}
+
+export interface Dashboard {
+  id: string
+  nombre: string
+  widgets: Widget[]
+  creadoEn: string
 }
 
 // ─── Gamification ─────────────────────────────────────────────────────────────
@@ -195,6 +217,7 @@ export interface AppState {
   tareas: Tarea[]
   registrosSemanal: RegistroSemanal[]
   deudas: Deuda[]
+  dashboards: Dashboard[]
   perfil: PerfilUsuario | null
   xp: EstadoXP
 }
@@ -219,6 +242,7 @@ export type AppAction =
       perfil?: PerfilUsuario
       ultimoCheckIn?: string
       presupuestos?: Presupuesto[]
+      dashboards?: Dashboard[]
     } }
   | { type: 'ADD_DIA_ACTIVO'; payload: DiaActivo }
   | { type: 'CHECKIN_HOY'; payload: string }
@@ -240,6 +264,10 @@ export type AppAction =
   | { type: 'ADD_DEUDA'; payload: Deuda }
   | { type: 'EDIT_DEUDA'; payload: Deuda }
   | { type: 'DELETE_DEUDA'; payload: string }
+  // Dashboards
+  | { type: 'ADD_DASHBOARD'; payload: Dashboard }
+  | { type: 'EDIT_DASHBOARD'; payload: Dashboard }
+  | { type: 'DELETE_DASHBOARD'; payload: string }
   // Gamification
   | { type: 'COMPLETAR_ONBOARDING'; payload: PerfilUsuario }
   | { type: 'ADD_XP'; payload: EventoXP }

@@ -19,6 +19,7 @@ const estadoInicial: AppState = {
   tareas: [],
   registrosSemanal: [],
   deudas: [],
+  dashboards: [],
   perfil: null,
   xp: xpInicial,
 }
@@ -133,6 +134,7 @@ function reducer(state: AppState, action: AppAction): AppState {
         registrosSemanal: action.payload.registrosSemanal ?? state.registrosSemanal,
         perfil: action.payload.perfil ?? state.perfil,
         ultimoCheckIn: action.payload.ultimoCheckIn ?? state.ultimoCheckIn,
+        dashboards: action.payload.dashboards ?? state.dashboards,
         xp: xpFromDemo.length > 0
           ? { total: xpTotal, historial: xpFromDemo.slice(-100) }
           : state.xp,
@@ -276,6 +278,14 @@ function reducer(state: AppState, action: AppAction): AppState {
       return { ...state, deudas: state.deudas.filter(d => d.id !== action.payload) }
 
     // ─── Gamification ─────────────────────────────────────────────────────
+    // ─── Dashboards ───────────────────────────────────────────────────────────
+    case 'ADD_DASHBOARD':
+      return { ...state, dashboards: [...state.dashboards, action.payload] }
+    case 'EDIT_DASHBOARD':
+      return { ...state, dashboards: state.dashboards.map(d => d.id === action.payload.id ? action.payload : d) }
+    case 'DELETE_DASHBOARD':
+      return { ...state, dashboards: state.dashboards.filter(d => d.id !== action.payload) }
+
     case 'COMPLETAR_ONBOARDING': {
       const bienvenida: EventoXP = crearEventoXP('onboarding', hoy())
       return {

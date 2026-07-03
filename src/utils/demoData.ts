@@ -1,7 +1,7 @@
 import { subDays, subMonths, format, startOfMonth, startOfWeek, subWeeks, addDays } from 'date-fns'
 import type {
   Transaccion, DiaActivo, Deuda, EventoXP, Presupuesto,
-  Habito, RegistroHabito, EstadoDia, Tarea, RegistroSemanal, PerfilUsuario,
+  Habito, RegistroHabito, EstadoDia, Tarea, RegistroSemanal, PerfilUsuario, Dashboard,
 } from '../types'
 
 function fechaDias(diasAtras: number): string {
@@ -359,6 +359,52 @@ export const perfilDemo: PerfilUsuario = {
   onboardingCompletado: true,
   creadoEn: fechaDias(365),
 }
+
+// ─── Dashboards ───────────────────────────────────────────────────────────────
+
+const hoyStr = format(new Date(), 'yyyy-MM-dd')
+
+export const dashboardsDemo: Dashboard[] = [
+  {
+    id: 'db-demo-1',
+    nombre: 'Finanzas',
+    creadoEn: hoyStr,
+    widgets: [
+      { id: 'w-d1-1', type: 'kpi_balance' },
+      { id: 'w-d1-2', type: 'kpi_ingresos' },
+      { id: 'w-d1-3', type: 'kpi_gastos' },
+      { id: 'w-d1-4', type: 'kpi_ahorro' },
+      { id: 'w-d1-5', type: 'chart_bar_6meses' },
+      { id: 'w-d1-6', type: 'chart_pie_gastos' },
+      { id: 'w-d1-7', type: 'recent_tx' },
+      { id: 'w-d1-8', type: 'kpi_deuda' },
+    ],
+  },
+  {
+    id: 'db-demo-2',
+    nombre: 'Productividad',
+    creadoEn: hoyStr,
+    widgets: [
+      { id: 'w-d2-1', type: 'kpi_racha' },
+      { id: 'w-d2-2', type: 'kpi_xp' },
+      { id: 'w-d2-3', type: 'kpi_tareas' },
+      { id: 'w-d2-4', type: 'task_progress' },
+      { id: 'w-d2-5', type: 'chart_habits' },
+    ],
+  },
+  {
+    id: 'db-demo-3',
+    nombre: 'Resumen',
+    creadoEn: hoyStr,
+    widgets: [
+      { id: 'w-d3-1', type: 'kpi_balance' },
+      { id: 'w-d3-2', type: 'kpi_racha' },
+      { id: 'w-d3-3', type: 'kpi_xp' },
+      { id: 'w-d3-4', type: 'camino_millon' },
+      { id: 'w-d3-5', type: 'chart_area_ahorro' },
+    ],
+  },
+]
 
 // ─── XP Events — totaling 20,956 XP (Élite rank) ─────────────────────────────
 // 365 check-ins × 5        = 1,825

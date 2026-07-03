@@ -1,12 +1,11 @@
-import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Zap } from 'lucide-react'
+import { Zap } from 'lucide-react'
+import { AppLayout } from '../components/layout/AppLayout'
 import { useApp } from '../store/AppContext'
 import { formatXP, getRangoInfo, getProgresoRango, getTemporadaActual, getXPTemporada, getProgresoTemporada, RANGOS } from '../utils/xp'
 import { formatearFecha } from '../utils/formatters'
 
 export function Temporada() {
   const { state } = useApp()
-  const navigate = useNavigate()
 
   const temporada = getTemporadaActual()
   const xpTotal = state.xp.total
@@ -15,119 +14,103 @@ export function Temporada() {
   const progresoTemporada = getProgresoTemporada(temporada)
   const rangoActual = getRangoInfo(xpTotal)
 
-  const historialReciente = [...state.xp.historial].reverse().slice(0, 20)
+  const historialReciente = [...state.xp.historial].reverse().slice(0, 15)
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-zinc-950 border-b border-zinc-800 px-4 py-3 flex items-center gap-3">
-        <button
-          onClick={() => navigate(-1)}
-          className="p-2 rounded-xl hover:bg-zinc-800 transition-colors"
-        >
-          <ChevronLeft size={20} className="text-zinc-400" />
-        </button>
-        <h1 className="text-white font-semibold">Temporada & Rango</h1>
-      </div>
+    <AppLayout titulo="Temporada & Rango">
+      <div className="space-y-4 max-w-5xl animate-fade-in">
 
-      <div className="p-4 space-y-4 max-w-lg mx-auto pb-24">
+        {/* Top row: Season + Current rank side by side on desktop */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-        {/* ─── Season card ──────────────────────────────────────────── */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <p className="text-zinc-500 text-xs mb-1">Temporada actual</p>
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <span>{temporada.emoji}</span>
-                {temporada.nombre}
-              </h2>
-              <p className="text-zinc-500 text-xs mt-1">
-                {formatearFecha(temporada.inicio)} → {formatearFecha(temporada.fin)}
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-zinc-500 text-xs">XP esta temporada</p>
-              <p className="text-2xl font-bold text-emerald-400">{formatXP(xpTemporada)}</p>
-            </div>
-          </div>
-
-          {/* Season progress bar */}
-          <div>
-            <div className="flex justify-between text-xs text-zinc-500 mb-1.5">
-              <span>Progreso de la temporada</span>
-              <span>{progresoTemporada}%</span>
-            </div>
-            <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all duration-700"
-                style={{ width: `${progresoTemporada}%` }}
-              />
-            </div>
-            <p className="text-zinc-600 text-xs mt-1.5">La temporada termina el {formatearFecha(temporada.fin)}</p>
-          </div>
-        </div>
-
-        {/* ─── Rank card ────────────────────────────────────────────── */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-          <p className="text-zinc-500 text-xs mb-3">Tu rango</p>
-          <div className="flex items-center gap-4 mb-5">
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl"
-              style={{ background: `${rangoActual.color}18`, border: `2px solid ${rangoActual.color}40` }}
-            >
-              {rangoActual.emoji}
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold" style={{ color: rangoActual.color }}>
-                {rangoActual.rango}
-              </h3>
-              <p className="text-zinc-400 text-sm">{formatXP(xpTotal)} XP total</p>
-            </div>
-          </div>
-
-          {/* XP bar to next rank */}
-          {progreso.siguiente ? (
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-base">{rangoActual.emoji}</span>
-                  <span className="text-zinc-400 text-xs">{rangoActual.rango}</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-zinc-400 text-xs">{progreso.siguiente.rango}</span>
-                  <span className="text-base">{progreso.siguiente.emoji}</span>
-                </div>
+          {/* Season card */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+            <p className="text-zinc-500 text-xs font-semibold uppercase tracking-widest mb-3">Temporada actual</p>
+            <div className="flex items-start justify-between gap-3 mb-5">
+              <div>
+                <h2 className="text-2xl font-bold text-white flex items-center gap-2 mb-1">
+                  <span className="text-3xl">{temporada.emoji}</span>
+                  {temporada.nombre}
+                </h2>
+                <p className="text-zinc-500 text-xs">
+                  {formatearFecha(temporada.inicio)} → {formatearFecha(temporada.fin)}
+                </p>
               </div>
-              <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
+              <div className="text-right flex-shrink-0">
+                <p className="text-zinc-500 text-xs mb-0.5">XP ganado</p>
+                <p className="text-2xl font-bold text-emerald-400">{formatXP(xpTemporada)}</p>
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-xs text-zinc-500 mb-1.5">
+                <span>Progreso de la temporada</span>
+                <span className="font-semibold text-zinc-300">{progresoTemporada}%</span>
+              </div>
+              <div className="h-2.5 bg-zinc-800 rounded-full overflow-hidden">
                 <div
-                  className="h-full rounded-full transition-all duration-700"
-                  style={{
-                    width: `${progreso.porcentaje}%`,
-                    background: `linear-gradient(90deg, ${rangoActual.color}88, ${rangoActual.color})`,
-                  }}
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all duration-700"
+                  style={{ width: `${progresoTemporada}%` }}
                 />
               </div>
-              <div className="flex justify-between text-xs mt-1.5">
-                <span className="text-zinc-500">{formatXP(progreso.xpEnRango)} XP en rango</span>
-                <span className="text-zinc-400">
-                  Faltan <span style={{ color: rangoActual.color }} className="font-semibold">
-                    {formatXP(progreso.xpParaSiguiente!)}
-                  </span> para {progreso.siguiente.rango}
-                </span>
+              <p className="text-zinc-600 text-xs mt-1.5">Termina el {formatearFecha(temporada.fin)}</p>
+            </div>
+          </div>
+
+          {/* Current rank card */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+            <p className="text-zinc-500 text-xs font-semibold uppercase tracking-widest mb-3">Tu rango</p>
+            <div className="flex items-center gap-4 mb-5">
+              <div
+                className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl flex-shrink-0"
+                style={{ background: `${rangoActual.color}18`, border: `2px solid ${rangoActual.color}50` }}
+              >
+                {rangoActual.emoji}
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-2xl font-bold truncate" style={{ color: rangoActual.color }}>
+                  {rangoActual.rango}
+                </h3>
+                <p className="text-zinc-400 text-sm">{formatXP(xpTotal)} XP total</p>
               </div>
             </div>
-          ) : (
-            <div className="text-center py-2">
-              <p className="text-emerald-400 font-semibold text-sm">Rango máximo alcanzado 👑</p>
-              <p className="text-zinc-500 text-xs mt-1">Sos de la élite de CIMA</p>
-            </div>
-          )}
+            {progreso.siguiente ? (
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-base">{rangoActual.emoji}</span>
+                    <span className="text-zinc-400 text-xs">{rangoActual.rango}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-zinc-400 text-xs">{progreso.siguiente.rango}</span>
+                    <span className="text-base">{progreso.siguiente.emoji}</span>
+                  </div>
+                </div>
+                <div className="h-3 bg-zinc-800 rounded-full overflow-hidden mb-2">
+                  <div
+                    className="h-full rounded-full transition-all duration-700"
+                    style={{ width: `${progreso.porcentaje}%`, background: `linear-gradient(90deg, ${rangoActual.color}88, ${rangoActual.color})` }}
+                  />
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-zinc-500">{formatXP(progreso.xpEnRango)} XP en rango</span>
+                  <span className="text-zinc-400">
+                    Faltan <span style={{ color: rangoActual.color }} className="font-semibold">{formatXP(progreso.xpParaSiguiente!)}</span> para {progreso.siguiente.rango}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-3 bg-[#ffd60008] border border-[#ffd60030] rounded-xl">
+                <p className="text-[#ffd600] font-semibold">Rango máximo alcanzado 👑</p>
+                <p className="text-zinc-500 text-xs mt-1">Sos de la élite de CIMA</p>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* ─── All ranks ────────────────────────────────────────────── */}
+        {/* All ranks grid */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-          <p className="text-zinc-500 text-xs mb-3">Todos los rangos</p>
-          <div className="space-y-2">
+          <p className="text-zinc-500 text-xs font-semibold uppercase tracking-widest mb-4">Todos los rangos</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {RANGOS.map(r => {
               const esCurrent = r.rango === rangoActual.rango
               const yaAlcanzado = xpTotal >= r.minXP
@@ -135,27 +118,37 @@ export function Temporada() {
                 <div
                   key={r.rango}
                   className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
-                    esCurrent
-                      ? 'border-opacity-60'
-                      : yaAlcanzado
-                      ? 'border-zinc-700 bg-zinc-800/40'
-                      : 'border-zinc-800/50 opacity-40'
+                    esCurrent ? '' : yaAlcanzado ? 'border-zinc-700 bg-zinc-800/30' : 'border-zinc-800/40 opacity-35'
                   }`}
-                  style={esCurrent ? { borderColor: `${r.color}60`, background: `${r.color}10` } : {}}
+                  style={esCurrent ? { borderColor: `${r.color}50`, background: `${r.color}0e` } : {}}
                 >
-                  <span className="text-xl">{r.emoji}</span>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium" style={{ color: esCurrent ? r.color : yaAlcanzado ? '#e4e4e7' : '#71717a' }}>
-                      {r.rango}
-                      {esCurrent && <span className="ml-2 text-xs font-normal text-zinc-500">← actual</span>}
-                    </p>
+                  <div
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-xl flex-shrink-0"
+                    style={esCurrent
+                      ? { background: `${r.color}20`, border: `1.5px solid ${r.color}50` }
+                      : { background: '#27272a' }}
+                  >
+                    {r.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-semibold truncate" style={{ color: esCurrent ? r.color : yaAlcanzado ? '#e4e4e7' : '#52525b' }}>
+                        {r.rango}
+                      </p>
+                      {esCurrent && (
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full" style={{ background: `${r.color}20`, color: r.color }}>
+                          actual
+                        </span>
+                      )}
+                    </div>
                     <p className="text-zinc-600 text-xs">
                       {r.maxXP ? `${formatXP(r.minXP)} – ${formatXP(r.maxXP)} XP` : `${formatXP(r.minXP)}+ XP`}
                     </p>
                   </div>
                   {yaAlcanzado && (
-                    <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                      <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                      style={{ background: esCurrent ? `${r.color}20` : '#18181b', border: `1px solid ${esCurrent ? r.color : '#3f3f46'}` }}>
+                      <div className="w-2 h-2 rounded-full" style={{ background: esCurrent ? r.color : '#10b981' }} />
                     </div>
                   )}
                 </div>
@@ -164,20 +157,22 @@ export function Temporada() {
           </div>
         </div>
 
-        {/* ─── Recent XP events ─────────────────────────────────────── */}
+        {/* XP History */}
         {historialReciente.length > 0 && (
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
-            <p className="text-zinc-500 text-xs mb-3">Historial de XP reciente</p>
-            <div className="space-y-2">
+            <p className="text-zinc-500 text-xs font-semibold uppercase tracking-widest mb-4">Historial de XP reciente</p>
+            <div className="space-y-1">
               {historialReciente.map((e, i) => (
-                <div key={i} className="flex items-center justify-between py-1.5 border-b border-zinc-800/50 last:border-0">
-                  <div className="flex items-center gap-2">
-                    <Zap size={13} className="text-emerald-400 flex-shrink-0" />
-                    <span className="text-zinc-300 text-sm">{e.motivo}</span>
+                <div key={i} className="flex items-center justify-between py-2 border-b border-zinc-800/50 last:border-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                      <Zap size={12} className="text-emerald-400" />
+                    </div>
+                    <span className="text-zinc-300 text-sm truncate">{e.motivo}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-emerald-400 font-semibold text-sm">+{e.cantidad}</span>
-                    <span className="text-zinc-600 text-xs">{e.fecha}</span>
+                  <div className="flex items-center gap-3 flex-shrink-0 ml-2">
+                    <span className="text-emerald-400 font-bold text-sm">+{e.cantidad}</span>
+                    <span className="text-zinc-600 text-xs hidden sm:block">{e.fecha}</span>
                   </div>
                 </div>
               ))}
@@ -185,6 +180,6 @@ export function Temporada() {
           </div>
         )}
       </div>
-    </div>
+    </AppLayout>
   )
 }

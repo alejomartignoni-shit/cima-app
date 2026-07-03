@@ -1,10 +1,10 @@
 import { NavLink } from 'react-router-dom'
-import { Home, ArrowLeftRight, TrendingUp, CheckSquare, Settings } from 'lucide-react'
+import { Home, ArrowLeftRight, LayoutDashboard, CheckSquare, Settings } from 'lucide-react'
 
 const navItems = [
   { to: '/', icon: Home, label: 'Inicio', exact: true },
   { to: '/transacciones', icon: ArrowLeftRight, label: 'Finanzas' },
-  { to: '/proyeccion', icon: TrendingUp, label: 'Millón' },
+  { to: '/dashboards', icon: LayoutDashboard, label: 'Boards' },
   { to: '/habitos', icon: CheckSquare, label: 'Hábitos' },
   { to: '/configuracion', icon: Settings, label: 'Config' },
 ]

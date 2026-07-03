@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { AppLayout } from '../components/layout/AppLayout'
-import { Plus, ChevronLeft, ChevronRight, Pencil, Trash2, Check } from 'lucide-react'
+import { Plus, ChevronLeft, ChevronRight, Pencil, Trash2, Check, BarChart2 } from 'lucide-react'
 import { useApp } from '../store/AppContext'
 import { Modal } from '../components/ui/Modal'
 import { hoy, formatearMes } from '../utils/formatters'
@@ -13,9 +13,12 @@ import {
   subMonths,
   isBefore,
   isToday,
+  subDays,
+  isAfter,
 } from 'date-fns'
 import { toast } from 'sonner'
 import type { Habito } from '../types'
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
 const EMOJIS = ['🏃', '💪', '📖', '💧', '🧘', '🍎', '😴', '🎯', '💊', '✍️', '🎵', '🧹', '💰', '🌿', '🚴', '🧠']
 const COLORES = ['#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#f43f5e', '#06b6d4', '#f97316', '#84cc16']
@@ -352,6 +355,37 @@ export function Habitos() {
             })}
           </div>
         )}
+
+        {/* Completion chart — last 30 days */}
+        {habitosActivos.length > 0 && (() => {
+          const hace30 = subDays(new Date(), 30)
+          const chartData = habitosActivos.map(h => ({
+            name: h.nombre.length > 12 ? h.nombre.slice(0, 12) + '…' : h.nombre,
+            Días: state.registrosHabito.filter(r => r.habitoId === h.id && isAfter(new Date(r.fecha), hace30)).length,
+            color: h.color,
+          }))
+          return (
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+              <div className="flex items-center gap-2 mb-4">
+                <BarChart2 size={15} className="text-zinc-500" />
+                <h3 className="text-zinc-300 font-medium text-sm">Días completados · últimos 30 días</h3>
+              </div>
+              <ResponsiveContainer width="100%" height={160}>
+                <BarChart data={chartData} barSize={20}>
+                  <XAxis dataKey="name" tick={{ fill: '#a1a1aa', fontSize: 11 }} axisLine={false} tickLine={false} />
+                  <YAxis domain={[0, 30]} tick={{ fill: '#71717a', fontSize: 10 }} axisLine={false} tickLine={false} width={24} />
+                  <Tooltip
+                    contentStyle={{ background: '#18181b', border: '1px solid #27272a', borderRadius: 8, fontSize: 12 }}
+                    cursor={{ fill: '#ffffff08' }}
+                  />
+                  <Bar dataKey="Días" radius={[4, 4, 0, 0]}>
+                    {chartData.map((d, i) => <Cell key={i} fill={d.color} />)}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )
+        })()}
       </div>
 
       {/* Modal: Add/Edit habit */}
