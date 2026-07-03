@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { AppLayout } from '../components/layout/AppLayout'
 import { Plus, X, Settings, Trash2, GripVertical, ChevronDown, ChevronUp, LayoutDashboard, Check } from 'lucide-react'
 import { useApp } from '../store/AppContext'
@@ -13,21 +13,21 @@ function genId() { return `db-${Date.now()}-${Math.random().toString(36).slice(2
 function wid() { return `w-${Date.now()}-${Math.random().toString(36).slice(2, 7)}` }
 
 const WIDGET_CATALOG: { type: WidgetType; label: string; descripcion: string; emoji: string }[] = [
-  { type: 'kpi_balance',      label: 'Balance del mes',     descripcion: 'Saldo actual del mes corriente',            emoji: '💰' },
-  { type: 'kpi_ingresos',     label: 'Ingresos',            descripcion: 'Total de ingresos del mes',                 emoji: '📈' },
-  { type: 'kpi_gastos',       label: 'Gastos',              descripcion: 'Total de gastos del mes',                   emoji: '📉' },
-  { type: 'kpi_ahorro',       label: 'Tasa de ahorro',      descripcion: 'Porcentaje de ingresos ahorrado',           emoji: '🏦' },
-  { type: 'kpi_racha',        label: 'Racha',               descripcion: 'Días consecutivos activos',                 emoji: '🔥' },
-  { type: 'kpi_xp',           label: 'XP Total',            descripcion: 'Puntos de experiencia acumulados',          emoji: '⚡' },
-  { type: 'kpi_deuda',        label: 'Deuda total',         descripcion: 'Suma de deudas pendientes',                 emoji: '💳' },
-  { type: 'kpi_tareas',       label: 'Tareas completadas',  descripcion: 'Progreso general de tareas',                emoji: '✅' },
-  { type: 'chart_bar_6meses', label: 'Ingresos vs Gastos',  descripcion: 'Gráfico de barras últimos 6 meses',         emoji: '📊' },
-  { type: 'chart_area_ahorro',label: 'Evolución de ahorro', descripcion: 'Área de ahorro mensual acumulado',          emoji: '📐' },
-  { type: 'chart_pie_gastos', label: 'Gastos por categoría',descripcion: 'Torta de distribución de gastos',           emoji: '🥧' },
-  { type: 'chart_habits',     label: 'Progreso de hábitos', descripcion: 'Días completados por hábito (30d)',         emoji: '🎯' },
-  { type: 'camino_millon',    label: 'Camino al millón',    descripcion: 'Barra de progreso hacia $1,000,000',        emoji: '🏆' },
-  { type: 'recent_tx',        label: 'Últimas transacciones',descripcion: 'Las 5 transacciones más recientes',        emoji: '💸' },
-  { type: 'task_progress',    label: 'Progreso de tareas',  descripcion: 'Barra de completado general',               emoji: '📋' },
+  { type: 'kpi_balance',      label: 'Balance del mes',      descripcion: 'Saldo actual del mes corriente',            emoji: '💰' },
+  { type: 'kpi_ingresos',     label: 'Ingresos',             descripcion: 'Total de ingresos del mes',                 emoji: '📈' },
+  { type: 'kpi_gastos',       label: 'Gastos',               descripcion: 'Total de gastos del mes',                   emoji: '📉' },
+  { type: 'kpi_ahorro',       label: 'Tasa de ahorro',       descripcion: 'Porcentaje de ingresos ahorrado',           emoji: '🏦' },
+  { type: 'kpi_racha',        label: 'Racha',                descripcion: 'Días consecutivos activos',                 emoji: '🔥' },
+  { type: 'kpi_xp',           label: 'XP Total',             descripcion: 'Puntos de experiencia acumulados',          emoji: '⚡' },
+  { type: 'kpi_deuda',        label: 'Deuda total',          descripcion: 'Suma de deudas pendientes',                 emoji: '💳' },
+  { type: 'kpi_tareas',       label: 'Tareas completadas',   descripcion: 'Progreso general de tareas',                emoji: '✅' },
+  { type: 'chart_bar_6meses', label: 'Ingresos vs Gastos',   descripcion: 'Gráfico de barras últimos 6 meses',         emoji: '📊' },
+  { type: 'chart_area_ahorro',label: 'Evolución de ahorro',  descripcion: 'Área de ahorro mensual acumulado',          emoji: '📐' },
+  { type: 'chart_pie_gastos', label: 'Gastos por categoría', descripcion: 'Torta de distribución de gastos',           emoji: '🥧' },
+  { type: 'chart_habits',     label: 'Progreso de hábitos',  descripcion: 'Días completados por hábito (30d)',         emoji: '🎯' },
+  { type: 'camino_millon',    label: 'Camino al millón',     descripcion: 'Barra de progreso hacia $1,000,000',        emoji: '🏆' },
+  { type: 'recent_tx',        label: 'Últimas transacciones',descripcion: 'Las 5 transacciones más recientes',         emoji: '💸' },
+  { type: 'task_progress',    label: 'Progreso de tareas',   descripcion: 'Barra de completado general',               emoji: '📋' },
 ]
 
 const fmt = (n: number) => n >= 1_000_000
@@ -300,30 +300,80 @@ const WIDGET_SIZE: Partial<Record<WidgetType, string>> = {
 }
 
 function DashboardView({ dashboard, onEdit }: { dashboard: Dashboard; onEdit: () => void }) {
+  const { dispatch } = useApp()
+  const dragIdRef = useRef<string | null>(null)
+  const [overIdx, setOverIdx] = useState<number | null>(null)
+  const [draggingId, setDraggingId] = useState<string | null>(null)
+
+  function handleDragStart(id: string) {
+    dragIdRef.current = id
+    setDraggingId(id)
+  }
+
+  function handleDragOver(e: React.DragEvent, idx: number) {
+    e.preventDefault()
+    setOverIdx(idx)
+  }
+
+  function handleDrop(targetIdx: number) {
+    const fromId = dragIdRef.current
+    if (!fromId) return
+    const fromIdx = dashboard.widgets.findIndex(w => w.id === fromId)
+    if (fromIdx === targetIdx) { dragIdRef.current = null; setDraggingId(null); setOverIdx(null); return }
+    const ws = [...dashboard.widgets]
+    const [moved] = ws.splice(fromIdx, 1)
+    ws.splice(targetIdx, 0, moved)
+    dispatch({ type: 'EDIT_DASHBOARD', payload: { ...dashboard, widgets: ws } })
+    dragIdRef.current = null
+    setDraggingId(null)
+    setOverIdx(null)
+  }
+
+  function handleDragEnd() {
+    dragIdRef.current = null
+    setDraggingId(null)
+    setOverIdx(null)
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h2 className="text-white font-semibold text-lg">{dashboard.nombre}</h2>
-        <button onClick={onEdit} className="flex items-center gap-1.5 text-zinc-400 hover:text-zinc-200 text-sm transition-colors bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 rounded-lg">
+        <button
+          onClick={onEdit}
+          className="flex items-center gap-1.5 text-zinc-400 hover:text-zinc-200 text-sm transition-colors bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 rounded-lg"
+        >
           <Settings size={14} />Editar
         </button>
       </div>
-      {dashboard.widgets.length === 0
-        ? (
-          <div className="border-2 border-dashed border-zinc-800 rounded-2xl p-12 text-center">
-            <p className="text-zinc-600 mb-2">Dashboard vacío</p>
-            <button onClick={onEdit} className="text-sm text-[#ffd600] hover:underline">+ Agregar widgets</button>
-          </div>
-        )
-        : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 auto-rows-[120px]">
-            {dashboard.widgets.map(w => (
-              <div key={w.id} className={`bg-zinc-900 border border-zinc-800 rounded-xl p-4 ${WIDGET_SIZE[w.type] ?? ''}`}>
-                <WidgetRenderer widget={w} />
-              </div>
-            ))}
-          </div>
-        )}
+      {dashboard.widgets.length === 0 ? (
+        <div className="border-2 border-dashed border-zinc-800 rounded-2xl p-12 text-center">
+          <p className="text-zinc-600 mb-2">Dashboard vacío</p>
+          <button onClick={onEdit} className="text-sm text-[#ffd600] hover:underline">+ Agregar widgets</button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 auto-rows-[120px]">
+          {dashboard.widgets.map((w, idx) => (
+            <div
+              key={w.id}
+              draggable
+              onDragStart={() => handleDragStart(w.id)}
+              onDragOver={e => handleDragOver(e, idx)}
+              onDrop={() => handleDrop(idx)}
+              onDragEnd={handleDragEnd}
+              className={`bg-zinc-900 border rounded-xl p-4 cursor-grab active:cursor-grabbing select-none transition-all duration-150 ${WIDGET_SIZE[w.type] ?? ''} ${
+                draggingId === w.id
+                  ? 'opacity-30 scale-95 border-zinc-700'
+                  : overIdx === idx && draggingId !== w.id
+                  ? 'border-[#ffd600] shadow-[0_0_0_1px_#ffd60030] bg-zinc-800/80'
+                  : 'border-zinc-800'
+              }`}
+            >
+              <WidgetRenderer widget={w} />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
@@ -334,6 +384,9 @@ function EditModal({ dashboard, onClose, onSave, onDelete }: {
   const [nombre, setNombre] = useState(dashboard.nombre)
   const [widgets, setWidgets] = useState<Widget[]>(dashboard.widgets)
   const [showLibrary, setShowLibrary] = useState(false)
+  const [draggingWIdx, setDraggingWIdx] = useState<number | null>(null)
+  const [overWIdx, setOverWIdx] = useState<number | null>(null)
+  const dragWIdxRef = useRef<number | null>(null)
 
   function addWidget(type: WidgetType) {
     if (widgets.some(w => w.type === type)) return
@@ -342,6 +395,21 @@ function EditModal({ dashboard, onClose, onSave, onDelete }: {
   function removeWidget(id: string) { setWidgets(ws => ws.filter(w => w.id !== id)) }
   function moveUp(i: number) { if (i === 0) return; const ws = [...widgets]; [ws[i-1], ws[i]] = [ws[i], ws[i-1]]; setWidgets(ws) }
   function moveDown(i: number) { if (i === widgets.length - 1) return; const ws = [...widgets]; [ws[i], ws[i+1]] = [ws[i+1], ws[i]]; setWidgets(ws) }
+
+  function handleWDragStart(i: number) { dragWIdxRef.current = i; setDraggingWIdx(i) }
+  function handleWDragOver(e: React.DragEvent, i: number) { e.preventDefault(); setOverWIdx(i) }
+  function handleWDrop(targetIdx: number) {
+    const fromIdx = dragWIdxRef.current
+    if (fromIdx === null || fromIdx === targetIdx) { dragWIdxRef.current = null; setDraggingWIdx(null); setOverWIdx(null); return }
+    const ws = [...widgets]
+    const [moved] = ws.splice(fromIdx, 1)
+    ws.splice(targetIdx, 0, moved)
+    setWidgets(ws)
+    dragWIdxRef.current = null
+    setDraggingWIdx(null)
+    setOverWIdx(null)
+  }
+  function handleWDragEnd() { dragWIdxRef.current = null; setDraggingWIdx(null); setOverWIdx(null) }
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4" onClick={onClose}>
@@ -358,7 +426,7 @@ function EditModal({ dashboard, onClose, onSave, onDelete }: {
           </div>
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-zinc-400 text-xs">Widgets ({widgets.length})</p>
+              <p className="text-zinc-400 text-xs">Widgets ({widgets.length}) · arrastrá para reordenar</p>
               <button onClick={() => setShowLibrary(!showLibrary)} className="text-xs text-[#ffd600] hover:underline flex items-center gap-1">
                 + Agregar {showLibrary ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
               </button>
@@ -386,8 +454,22 @@ function EditModal({ dashboard, onClose, onSave, onDelete }: {
                 : widgets.map((w, i) => {
                   const cat = WIDGET_CATALOG.find(c => c.type === w.type)
                   return (
-                    <div key={w.id} className="flex items-center gap-2 bg-zinc-800 rounded-lg p-2.5">
-                      <GripVertical size={14} className="text-zinc-600 flex-shrink-0" />
+                    <div
+                      key={w.id}
+                      draggable
+                      onDragStart={() => handleWDragStart(i)}
+                      onDragOver={e => handleWDragOver(e, i)}
+                      onDrop={() => handleWDrop(i)}
+                      onDragEnd={handleWDragEnd}
+                      className={`flex items-center gap-2 rounded-lg p-2.5 cursor-grab active:cursor-grabbing select-none transition-all border ${
+                        draggingWIdx === i
+                          ? 'opacity-30 bg-zinc-800 border-zinc-700'
+                          : overWIdx === i && draggingWIdx !== i
+                          ? 'bg-zinc-700/60 border-[#ffd600]/50'
+                          : 'bg-zinc-800 border-transparent'
+                      }`}
+                    >
+                      <GripVertical size={14} className="text-zinc-500 flex-shrink-0" />
                       <span className="text-sm">{cat?.emoji}</span>
                       <span className="text-zinc-200 text-sm flex-1">{cat?.label ?? w.type}</span>
                       <div className="flex gap-1">

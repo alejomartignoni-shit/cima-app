@@ -203,6 +203,19 @@ export interface EstadoXP {
   historial: EventoXP[] // last 100
 }
 
+// ─── Credits ──────────────────────────────────────────────────────────────────
+
+export interface CreditoEvento {
+  fecha: string // YYYY-MM-DD
+  cantidad: number
+  motivo: string
+}
+
+export interface EstadoCreditos {
+  total: number
+  historial: CreditoEvento[] // last 100
+}
+
 // ─── App state ────────────────────────────────────────────────────────────────
 
 export interface AppState {
@@ -220,6 +233,7 @@ export interface AppState {
   dashboards: Dashboard[]
   perfil: PerfilUsuario | null
   xp: EstadoXP
+  creditos: EstadoCreditos
 }
 
 export type AppAction =
@@ -243,6 +257,8 @@ export type AppAction =
       ultimoCheckIn?: string
       presupuestos?: Presupuesto[]
       dashboards?: Dashboard[]
+      logros?: Logro[]
+      creditos?: EstadoCreditos
     } }
   | { type: 'ADD_DIA_ACTIVO'; payload: DiaActivo }
   | { type: 'CHECKIN_HOY'; payload: string }

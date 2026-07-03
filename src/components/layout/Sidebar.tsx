@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Home, ArrowLeftRight, Flame, PieChart, Settings, CheckSquare, ListChecks, CalendarDays, Trophy, TrendingUp, Sun, Moon, LayoutDashboard } from 'lucide-react'
+import { Home, ArrowLeftRight, Flame, PieChart, Settings, CheckSquare, ListChecks, CalendarDays, Trophy, TrendingUp, Sun, Moon, LayoutDashboard, Gift } from 'lucide-react'
 import { useApp } from '../../store/AppContext'
 import { useTheme } from '../../store/ThemeContext'
 import { calcularRacha } from '../../utils/streakLogic'
@@ -28,6 +28,7 @@ const navGroups = [
     items: [
       { to: '/dashboards', icon: LayoutDashboard, label: 'Dashboards' },
       { to: '/temporada', icon: Trophy, label: 'Temporada & Rango' },
+      { to: '/recompensas', icon: Gift, label: 'Recompensas' },
       { to: '/configuracion', icon: Settings, label: 'Configuración' },
     ],
   },

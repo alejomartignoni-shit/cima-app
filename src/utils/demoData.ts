@@ -2,6 +2,7 @@ import { subDays, subMonths, format, startOfMonth, startOfWeek, subWeeks, addDay
 import type {
   Transaccion, DiaActivo, Deuda, EventoXP, Presupuesto,
   Habito, RegistroHabito, EstadoDia, Tarea, RegistroSemanal, PerfilUsuario, Dashboard,
+  Logro, EstadoCreditos,
 } from '../types'
 
 function fechaDias(diasAtras: number): string {
@@ -723,3 +724,74 @@ export const xpEventosDemo: EventoXP[] = [
     motivo: ['Racha 7 días 🔥', 'Racha 30 días 🔥', 'Primer mes positivo 💰', 'Meta de ahorro cumplida 🎯', 'Primer freelance cobrado 💸', 'Racha 90 días ⚡', 'Hábito 100 días 💪', 'Sin deudas nuevas 30 días 🏆', 'Mes con superávit 20%+ 🚀'][i % 9],
   })),
 ]
+
+// ─── Logros demo ─────────────────────────────────────────────────────────────
+
+export const logrosDemo: Logro[] = [
+  // Racha (91-day streak unlocks up to racha-90)
+  { id: 'racha-3',   nombre: '3 días encendido',       descripcion: '', icono: '🔥', desbloqueadoEn: fechaDias(88) },
+  { id: 'racha-7',   nombre: 'Semana perfecta',         descripcion: '', icono: '🔥', desbloqueadoEn: fechaDias(84) },
+  { id: 'racha-14',  nombre: 'Dos semanas imparable',   descripcion: '', icono: '⚡', desbloqueadoEn: fechaDias(77) },
+  { id: 'racha-30',  nombre: 'Mes de fuego',            descripcion: '', icono: '🌋', desbloqueadoEn: fechaDias(61) },
+  { id: 'racha-90',  nombre: 'Imparable',               descripcion: '', icono: '💥', desbloqueadoEn: fechaDias(1)  },
+  // Finanzas
+  { id: 'tx-primera',       nombre: 'Primera transacción',    descripcion: '', icono: '💸', desbloqueadoEn: fechaDias(364) },
+  { id: 'tx-10',            nombre: 'Contador activo',         descripcion: '', icono: '📊', desbloqueadoEn: fechaDias(355) },
+  { id: 'tx-50',            nombre: 'Maestro del registro',    descripcion: '', icono: '📈', desbloqueadoEn: fechaDias(330) },
+  { id: 'mes-positivo',     nombre: 'En verde',                descripcion: '', icono: '🟢', desbloqueadoEn: fechaDias(180) },
+  { id: 'ahorro-20',        nombre: 'Ahorrador pro',           descripcion: '', icono: '🏦', desbloqueadoEn: fechaDias(90)  },
+  { id: 'presupuesto-activo', nombre: 'Con presupuesto',       descripcion: '', icono: '📋', desbloqueadoEn: fechaDias(120) },
+  { id: 'deuda-registrada', nombre: 'Cara a cara con la deuda',descripcion: '', icono: '💳', desbloqueadoEn: fechaDias(200) },
+  // Hábitos
+  { id: 'habito-primero',        nombre: 'Primer hábito',          descripcion: '', icono: '🌱', desbloqueadoEn: fechaDias(300) },
+  { id: 'habito-3-activos',      nombre: 'Sistema en marcha',      descripcion: '', icono: '⚙️', desbloqueadoEn: fechaDias(280) },
+  { id: 'habito-5-activos',      nombre: 'Arquitecto de hábitos',  descripcion: '', icono: '🏗️', desbloqueadoEn: fechaDias(250) },
+  { id: 'habito-100-registros',  nombre: 'Consistencia',           descripcion: '', icono: '💪', desbloqueadoEn: fechaDias(150) },
+  { id: 'habito-500-registros',  nombre: 'Disciplina de hierro',   descripcion: '', icono: '🦾', desbloqueadoEn: fechaDias(30)  },
+  // Tareas
+  { id: 'tarea-primera', nombre: 'Primera tarea completada', descripcion: '', icono: '✅', desbloqueadoEn: fechaDias(300) },
+  { id: 'tarea-10',      nombre: 'Ejecutor',                 descripcion: '', icono: '⚡', desbloqueadoEn: fechaDias(100) },
+  { id: 'tarea-alta-3',  nombre: 'Prioridad primero',        descripcion: '', icono: '🔴', desbloqueadoEn: fechaDias(180) },
+  // Rango (20,040 XP = Élite)
+  { id: 'rango-aprendiz',  nombre: 'Rango Aprendiz',          descripcion: '', icono: '📗', desbloqueadoEn: fechaDias(360) },
+  { id: 'rango-bronce',    nombre: '¡Bronce desbloqueado!',   descripcion: '', icono: '🥉', desbloqueadoEn: fechaDias(340) },
+  { id: 'rango-plata',     nombre: '¡Plata desbloqueado!',    descripcion: '', icono: '🥈', desbloqueadoEn: fechaDias(300) },
+  { id: 'rango-oro',       nombre: '¡Oro desbloqueado!',      descripcion: '', icono: '🥇', desbloqueadoEn: fechaDias(240) },
+  { id: 'rango-platino',   nombre: '¡Platino desbloqueado!',  descripcion: '', icono: '💎', desbloqueadoEn: fechaDias(180) },
+  { id: 'rango-esmeralda', nombre: '¡Esmeralda desbloqueado!',descripcion: '', icono: '💚', desbloqueadoEn: fechaDias(120) },
+  { id: 'rango-zafiro',    nombre: '¡Zafiro desbloqueado!',   descripcion: '', icono: '💙', desbloqueadoEn: fechaDias(60)  },
+  { id: 'rango-diamante',  nombre: '¡Diamante desbloqueado!', descripcion: '', icono: '💠', desbloqueadoEn: fechaDias(30)  },
+  { id: 'rango-elite',     nombre: '¡ÉLITE! Merch desbloqueado 👑', descripcion: '', icono: '👑', desbloqueadoEn: fechaDias(7) },
+  // Especial
+  { id: 'diario-primer', nombre: 'Primer diario',          descripcion: '', icono: '✍️', desbloqueadoEn: fechaDias(350) },
+  { id: 'diario-10',     nombre: 'Escritor consistente',   descripcion: '', icono: '📓', desbloqueadoEn: fechaDias(200) },
+  { id: 'mood-racha',    nombre: 'En sintonía',            descripcion: '', icono: '🎭', desbloqueadoEn: fechaDias(7)   },
+]
+
+// ─── Credits demo ─────────────────────────────────────────────────────────────
+
+export const creditosDemo: EstadoCreditos = {
+  total: 28_540,
+  historial: [
+    { fecha: fechaDias(7),  cantidad: 10000, motivo: '🏆 ¡ÉLITE! Merch desbloqueado 👑' },
+    { fecha: fechaDias(7),  cantidad: 100,   motivo: '🎭 En sintonía' },
+    { fecha: fechaDias(7),  cantidad: 10,    motivo: 'Check-in diario' },
+    { fecha: fechaDias(8),  cantidad: 10,    motivo: 'Check-in diario' },
+    { fecha: fechaDias(9),  cantidad: 10,    motivo: 'Check-in diario' },
+    { fecha: fechaDias(10), cantidad: 3,     motivo: 'Transacción registrada' },
+    { fecha: fechaDias(10), cantidad: 2,     motivo: 'Hábito completado' },
+    { fecha: fechaDias(10), cantidad: 2,     motivo: 'Hábito completado' },
+    { fecha: fechaDias(11), cantidad: 10,    motivo: 'Check-in diario' },
+    { fecha: fechaDias(11), cantidad: 2,     motivo: 'Hábito completado' },
+    { fecha: fechaDias(12), cantidad: 3,     motivo: 'Transacción registrada' },
+    { fecha: fechaDias(13), cantidad: 10,    motivo: 'Check-in diario' },
+    { fecha: fechaDias(14), cantidad: 5,     motivo: 'Diario semanal' },
+    { fecha: fechaDias(15), cantidad: 20,    motivo: 'Tarea completada: Revisar strategy Fidel' },
+    { fecha: fechaDias(20), cantidad: 150,   motivo: '🏆 Tareas Alta × 3 completadas' },
+    { fecha: fechaDias(25), cantidad: 3,     motivo: 'Transacción registrada' },
+    { fecha: fechaDias(28), cantidad: 2,     motivo: 'Hábito completado' },
+    { fecha: fechaDias(30), cantidad: 5000,  motivo: '🏆 ¡Diamante desbloqueado!' },
+    { fecha: fechaDias(30), cantidad: 750,   motivo: '🦾 Disciplina de hierro' },
+    { fecha: fechaDias(60), cantidad: 3000,  motivo: '🏆 ¡Zafiro desbloqueado!' },
+  ],
+}

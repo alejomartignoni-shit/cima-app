@@ -1,11 +1,13 @@
 import { createContext, useContext, useReducer, useEffect, type ReactNode } from 'react'
-import type { AppState, AppAction, DiaSemana, EstadoXP, EventoXP, PrioridadTarea } from '../types'
+import type { AppState, AppAction, DiaSemana, EstadoXP, EventoXP, EstadoCreditos, CreditoEvento, PrioridadTarea } from '../types'
 import { hoy } from '../utils/formatters'
 import { agregarXP, crearEventoXP } from '../utils/xp'
+import { applyLogros } from '../utils/logros'
 
 const STORAGE_KEY = 'cima-v1'
 
 const xpInicial: EstadoXP = { total: 0, historial: [] }
+const creditosInicial: EstadoCreditos = { total: 0, historial: [] }
 
 const estadoInicial: AppState = {
   transacciones: [],
@@ -22,6 +24,23 @@ const estadoInicial: AppState = {
   dashboards: [],
   perfil: null,
   xp: xpInicial,
+  creditos: creditosInicial,
+}
+
+const CREDITOS = {
+  checkin: 10,
+  transaccion: 3,
+  habito: 2,
+  diario: 5,
+  onboarding: 50,
+  tarea: { Alta: 20, Media: 10, Baja: 5, Opcional: 2 } as Record<PrioridadTarea, number>,
+}
+
+function addCredito(creditos: EstadoCreditos, evento: CreditoEvento): EstadoCreditos {
+  return {
+    total: creditos.total + evento.cantidad,
+    historial: [...creditos.historial.slice(-99), evento],
+  }
 }
 
 function cargarEstado(): AppState {
@@ -29,7 +48,6 @@ function cargarEstado(): AppState {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return estadoInicial
     const loaded: AppState = { ...estadoInicial, ...JSON.parse(raw) }
-    // Auto-skip onboarding for existing users who already have data
     if (!loaded.perfil && loaded.transacciones.length > 0) {
       loaded.perfil = {
         nombre: 'Usuario',
@@ -70,7 +88,7 @@ const XP_POR_PRIORIDAD: Record<PrioridadTarea, string> = {
   Opcional: 'tarea_opcional',
 }
 
-function reducer(state: AppState, action: AppAction): AppState {
+function reducerCore(state: AppState, action: AppAction): AppState {
   switch (action.type) {
     case 'ADD_TRANSACCION': {
       const fechaTx = action.payload.fecha
@@ -84,6 +102,7 @@ function reducer(state: AppState, action: AppAction): AppState {
         transacciones: [...state.transacciones, action.payload],
         diasActivos: nuevasDias,
         xp: agregarXP(state.xp, evento),
+        creditos: addCredito(state.creditos, { fecha: fechaTx, cantidad: CREDITOS.transaccion, motivo: 'Transacción registrada' }),
       }
     }
 
@@ -135,6 +154,8 @@ function reducer(state: AppState, action: AppAction): AppState {
         perfil: action.payload.perfil ?? state.perfil,
         ultimoCheckIn: action.payload.ultimoCheckIn ?? state.ultimoCheckIn,
         dashboards: action.payload.dashboards ?? state.dashboards,
+        logros: action.payload.logros ?? state.logros,
+        creditos: action.payload.creditos ?? state.creditos,
         xp: xpFromDemo.length > 0
           ? { total: xpTotal, historial: xpFromDemo.slice(-100) }
           : state.xp,
@@ -161,6 +182,7 @@ function reducer(state: AppState, action: AppAction): AppState {
         diasActivos: nuevasDias,
         ultimoCheckIn: action.payload,
         xp: agregarXP(state.xp, evento),
+        creditos: addCredito(state.creditos, { fecha: fechaHoy, cantidad: CREDITOS.checkin, motivo: 'Check-in diario' }),
       }
     }
 
@@ -198,12 +220,16 @@ function reducer(state: AppState, action: AppAction): AppState {
       const nuevoXP = !existe
         ? agregarXP(state.xp, crearEventoXP('habito', fecha))
         : state.xp
+      const nuevosCreditos = !existe
+        ? addCredito(state.creditos, { fecha, cantidad: CREDITOS.habito, motivo: 'Hábito completado' })
+        : state.creditos
       return {
         ...state,
         registrosHabito: existe
           ? state.registrosHabito.filter(r => !(r.fecha === fecha && r.habitoId === habitoId))
           : [...state.registrosHabito, { fecha, habitoId }],
         xp: nuevoXP,
+        creditos: nuevosCreditos,
       }
     }
 
@@ -229,10 +255,18 @@ function reducer(state: AppState, action: AppAction): AppState {
       const nuevoXP = completandose
         ? agregarXP(state.xp, crearEventoXP(xpClave, hoy()))
         : state.xp
+      const creditosTarea = completandose
+        ? addCredito(state.creditos, {
+            fecha: hoy(),
+            cantidad: CREDITOS.tarea[action.payload.prioridad],
+            motivo: `Tarea completada: ${action.payload.titulo.slice(0, 30)}`,
+          })
+        : state.creditos
       return {
         ...state,
         tareas: state.tareas.map(t => t.id === action.payload.id ? action.payload : t),
         xp: nuevoXP,
+        creditos: creditosTarea,
       }
     }
 
@@ -252,6 +286,10 @@ function reducer(state: AppState, action: AppAction): AppState {
         tieneContenidoNuevo && !yaTeníaContenido
           ? agregarXP(state.xp, crearEventoXP('diario_semanal', hoy()))
           : state.xp
+      const nuevosCreditos =
+        tieneContenidoNuevo && !yaTeníaContenido
+          ? addCredito(state.creditos, { fecha: hoy(), cantidad: CREDITOS.diario, motivo: 'Diario semanal' })
+          : state.creditos
       return {
         ...state,
         registrosSemanal: upsertDiaSemanal(
@@ -261,6 +299,7 @@ function reducer(state: AppState, action: AppAction): AppState {
           action.payload.dia
         ),
         xp: nuevoXP,
+        creditos: nuevosCreditos,
       }
     }
 
@@ -277,8 +316,7 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'DELETE_DEUDA':
       return { ...state, deudas: state.deudas.filter(d => d.id !== action.payload) }
 
-    // ─── Gamification ─────────────────────────────────────────────────────
-    // ─── Dashboards ───────────────────────────────────────────────────────────
+    // ─── Dashboards ───────────────────────────────────────────────────────
     case 'ADD_DASHBOARD':
       return { ...state, dashboards: [...state.dashboards, action.payload] }
     case 'EDIT_DASHBOARD':
@@ -286,12 +324,14 @@ function reducer(state: AppState, action: AppAction): AppState {
     case 'DELETE_DASHBOARD':
       return { ...state, dashboards: state.dashboards.filter(d => d.id !== action.payload) }
 
+    // ─── Gamification ─────────────────────────────────────────────────────
     case 'COMPLETAR_ONBOARDING': {
       const bienvenida: EventoXP = crearEventoXP('onboarding', hoy())
       return {
         ...state,
         perfil: action.payload,
         xp: agregarXP(state.xp, bienvenida),
+        creditos: addCredito(state.creditos, { fecha: hoy(), cantidad: CREDITOS.onboarding, motivo: 'Bienvenido a CIMA 🚀' }),
       }
     }
 
@@ -301,6 +341,13 @@ function reducer(state: AppState, action: AppAction): AppState {
     default:
       return state
   }
+}
+
+function reducer(state: AppState, action: AppAction): AppState {
+  const next = reducerCore(state, action)
+  // Skip logro check for bulk loads (already has logros set) and pure reads
+  if (action.type === 'CARGAR_DEMO') return next
+  return applyLogros(next)
 }
 
 interface AppContextValue {

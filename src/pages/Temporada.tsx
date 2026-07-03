@@ -1,4 +1,5 @@
 import { Zap } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { AppLayout } from '../components/layout/AppLayout'
 import { useApp } from '../store/AppContext'
 import { formatXP, getRangoInfo, getProgresoRango, getTemporadaActual, getXPTemporada, getProgresoTemporada, RANGOS } from '../utils/xp'
@@ -179,6 +180,37 @@ export function Temporada() {
             </div>
           </div>
         )}
+
+        {/* Elite merch teaser / unlock */}
+        <Link to="/recompensas" className="block">
+          <div className={`rounded-2xl p-5 border transition-all hover:scale-[1.01] ${
+            rangoActual.rango === 'Élite'
+              ? 'bg-gradient-to-br from-[#ffd600]/10 to-zinc-900 border-[#ffd600]/30'
+              : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700'
+          }`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 ${
+                  rangoActual.rango === 'Élite' ? 'bg-[#ffd600]/15' : 'bg-zinc-800'
+                }`}>
+                  {rangoActual.rango === 'Élite' ? '👑' : '🎁'}
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm">
+                    {rangoActual.rango === 'Élite' ? '¡Merch gratis desbloqueado!' : 'Recompensas & Merch Élite'}
+                  </p>
+                  <p className="text-zinc-500 text-xs mt-0.5">
+                    {rangoActual.rango === 'Élite'
+                      ? 'Reclamá tu taza, remera, hoodie o cuadro de Mentes Millonarias'
+                      : `Alcanzá Élite y recibís merch gratis · ${Math.max(0, 20000 - xpTotal).toLocaleString('es-AR')} XP restantes`}
+                  </p>
+                </div>
+              </div>
+              <span className={`text-sm flex-shrink-0 ${rangoActual.rango === 'Élite' ? 'text-[#ffd600]' : 'text-zinc-600'}`}>→</span>
+            </div>
+          </div>
+        </Link>
+
       </div>
     </AppLayout>
   )

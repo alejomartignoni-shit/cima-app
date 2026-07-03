@@ -1,11 +1,11 @@
 import { NavLink } from 'react-router-dom'
-import { Home, ArrowLeftRight, LayoutDashboard, CheckSquare, Settings } from 'lucide-react'
+import { Home, ArrowLeftRight, LayoutDashboard, Gift, Settings } from 'lucide-react'
 
 const navItems = [
   { to: '/', icon: Home, label: 'Inicio', exact: true },
   { to: '/transacciones', icon: ArrowLeftRight, label: 'Finanzas' },
   { to: '/dashboards', icon: LayoutDashboard, label: 'Boards' },
-  { to: '/habitos', icon: CheckSquare, label: 'Hábitos' },
+  { to: '/recompensas', icon: Gift, label: 'Premios' },
   { to: '/configuracion', icon: Settings, label: 'Config' },
 ]
 

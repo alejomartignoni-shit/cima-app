@@ -31,6 +31,7 @@ import { Temporada } from './pages/Temporada'
 import { Onboarding } from './pages/Onboarding'
 import { Proyeccion } from './pages/Proyeccion'
 import { Dashboards } from './pages/Dashboards'
+import { Recompensas } from './pages/Recompensas'
 
 function OnboardingGuard({ children }: { children: React.ReactNode }) {
   const { state } = useApp()
@@ -55,6 +56,7 @@ function AppRoutes() {
       <Route path="/proyeccion" element={<OnboardingGuard><Proyeccion /></OnboardingGuard>} />
       <Route path="/configuracion" element={<OnboardingGuard><Configuracion /></OnboardingGuard>} />
       <Route path="/dashboards" element={<OnboardingGuard><Dashboards /></OnboardingGuard>} />
+      <Route path="/recompensas" element={<OnboardingGuard><Recompensas /></OnboardingGuard>} />
     </Routes>
   )
 }

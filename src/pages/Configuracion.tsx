@@ -5,6 +5,7 @@ import {
   transaccionesDemo, generarDiasActivosDemo, deudasDemo, xpEventosDemo,
   habitosDemo, registrosHabitoDemo, estadosDiaDemo, tareasDemo,
   registrosSemanalesDemo, perfilDemo, presupuestosDemo, dashboardsDemo,
+  logrosDemo, creditosDemo,
 } from '../utils/demoData'
 import { useInstallPrompt } from '../hooks/useInstallPrompt'
 import { toast } from 'sonner'
@@ -30,6 +31,8 @@ export function Configuracion() {
         ultimoCheckIn: new Date().toISOString().split('T')[0],
         presupuestos: presupuestosDemo,
         dashboards: dashboardsDemo,
+        logros: logrosDemo,
+        creditos: creditosDemo,
       },
     })
     toast.success('¡Datos de ejemplo cargados!', {
