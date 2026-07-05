@@ -1,8 +1,9 @@
-import { Component, type ReactNode } from 'react'
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Component, type ReactNode, useEffect } from 'react'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { AppProvider, useApp } from './store/AppContext'
 import { ThemeProvider } from './store/ThemeContext'
+import { hoy } from './utils/formatters'
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null }
@@ -36,9 +37,22 @@ import { Landing } from './pages/Landing'
 import { Entrar } from './pages/Entrar'
 
 function OnboardingGuard({ children }: { children: React.ReactNode }) {
-  const { state } = useApp()
+  const { state, dispatch } = useApp()
+
+  useEffect(() => {
+    if (!state.perfil?.onboardingCompletado) {
+      dispatch({
+        type: 'COMPLETAR_ONBOARDING',
+        payload: {
+          nombre: 'Usuario', objetivo: 'controlar', obstaculo: '',
+          intereses: [], onboardingCompletado: true, creadoEn: hoy(),
+        },
+      })
+    }
+  }, [])
+
   if (!state.perfil?.onboardingCompletado) {
-    return <Navigate to="/landing" replace />
+    return <div className="min-h-screen bg-zinc-950" />
   }
   return <>{children}</>
 }
