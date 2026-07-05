@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Navigate } from 'react-router-dom'
 import { useApp } from '../store/AppContext'
 import { hoy } from '../utils/formatters'
 
 export function Entrar() {
   const { dispatch, state } = useApp()
-  const [ready, setReady] = useState(false)
+  const onboarded = state.perfil?.onboardingCompletado
 
   useEffect(() => {
-    if (!state.perfil?.onboardingCompletado) {
+    if (!onboarded) {
       dispatch({
         type: 'COMPLETAR_ONBOARDING',
         payload: {
@@ -21,11 +21,11 @@ export function Entrar() {
         },
       })
     }
-    // Wait one tick so the state update commits before we navigate
-    setReady(true)
   }, [])
 
-  if (ready) return <Navigate to="/" replace />
+  // Only navigate after we can OBSERVE onboardingCompletado = true in the context.
+  // This guarantees OnboardingGuard at "/" won't see stale state.
+  if (onboarded) return <Navigate to="/" replace />
 
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
