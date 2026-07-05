@@ -201,7 +201,7 @@ export function Temporada() {
                   </p>
                   <p className="text-zinc-500 text-xs mt-0.5">
                     {rangoActual.rango === 'Élite'
-                      ? 'Reclamá tu taza, remera, hoodie o cuadro de Mentes Millonarias'
+                      ? 'Reclamá tu hoodie de Mentes Millonarias'
                       : `Alcanzá Élite y recibís merch gratis · ${Math.max(0, 20000 - xpTotal).toLocaleString('es-AR')} XP restantes`}
                   </p>
                 </div>

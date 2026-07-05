@@ -723,6 +723,12 @@ export const xpEventosDemo: EventoXP[] = [
     cantidad: 100,
     motivo: ['Racha 7 días 🔥', 'Racha 30 días 🔥', 'Primer mes positivo 💰', 'Meta de ahorro cumplida 🎯', 'Primer freelance cobrado 💸', 'Racha 90 días ⚡', 'Hábito 100 días 💪', 'Sin deudas nuevas 30 días 🏆', 'Mes con superávit 20%+ 🚀'][i % 9],
   })),
+  // Top-up para garantizar rango Élite (20,000 XP)
+  ...Array.from({ length: 42 }, (_, i) => ({
+    fecha: fechaDias(i * 8),
+    cantidad: 100,
+    motivo: 'Logro desbloqueado 🏆',
+  })),
 ]
 
 // ─── Logros demo ─────────────────────────────────────────────────────────────

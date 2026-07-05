@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { ChevronRight, ChevronLeft, Check } from 'lucide-react'
+import { useNavigate, Link } from 'react-router-dom'
+import { ChevronRight, ChevronLeft, Check, Flame } from 'lucide-react'
 import { useApp } from '../store/AppContext'
 import { hoy } from '../utils/formatters'
 import { getRangoInfo } from '../utils/xp'
@@ -88,10 +88,13 @@ export function Onboarding() {
     <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center p-4">
       {/* Logo */}
       <div className="mb-8 text-center">
-        <div className="text-3xl font-bold text-white tracking-tight">
-          <span className="text-emerald-400">C</span>IMA
-        </div>
-        <p className="text-zinc-500 text-sm mt-1">Tu camino a la libertad financiera</p>
+        <Link to="/landing" className="inline-flex items-center gap-2 mb-3 hover:opacity-80 transition-opacity">
+          <div className="w-9 h-9 rounded-xl bg-[#ffd600] flex items-center justify-center shadow-lg shadow-[#ffd600]/20">
+            <Flame size={20} className="text-zinc-950" />
+          </div>
+          <span className="text-2xl font-extrabold text-white tracking-tight">CIMA</span>
+        </Link>
+        <p className="text-zinc-500 text-sm">Tu sistema operativo personal</p>
       </div>
 
       {/* Progress bar */}
@@ -101,7 +104,7 @@ export function Onboarding() {
             <div
               key={i}
               className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                i <= step ? 'bg-emerald-500' : 'bg-zinc-800'
+                i <= step ? 'bg-[#ffd600]' : 'bg-zinc-800'
               }`}
             />
           ))}
@@ -123,7 +126,7 @@ export function Onboarding() {
               onChange={e => setNombre(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && canNext && avanzar()}
               placeholder="Tu nombre"
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 transition-colors text-lg"
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:border-[#ffd600] transition-colors text-lg"
               autoFocus
             />
           </div>
@@ -141,7 +144,7 @@ export function Onboarding() {
                   onClick={() => setObjetivo(o.value)}
                   className={`w-full flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${
                     objetivo === o.value
-                      ? 'border-emerald-500 bg-emerald-500/10'
+                      ? 'border-[#ffd600] bg-[#ffd600]/10'
                       : 'border-zinc-800 bg-zinc-800/50 hover:border-zinc-700'
                   }`}
                 >
@@ -151,7 +154,7 @@ export function Onboarding() {
                     <p className="text-zinc-500 text-xs">{o.desc}</p>
                   </div>
                   {objetivo === o.value && (
-                    <div className="ml-auto w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                    <div className="ml-auto w-5 h-5 rounded-full bg-[#ffd600] flex items-center justify-center flex-shrink-0">
                       <Check size={12} className="text-white" />
                     </div>
                   )}
@@ -173,14 +176,14 @@ export function Onboarding() {
                   onClick={() => setObstaculo(o.value)}
                   className={`w-full flex items-center gap-3 p-3.5 rounded-xl border text-left transition-all ${
                     obstaculo === o.value
-                      ? 'border-emerald-500 bg-emerald-500/10'
+                      ? 'border-[#ffd600] bg-[#ffd600]/10'
                       : 'border-zinc-800 bg-zinc-800/50 hover:border-zinc-700'
                   }`}
                 >
                   <span className="text-2xl">{o.emoji}</span>
                   <p className="text-white text-sm font-medium">{o.label}</p>
                   {obstaculo === o.value && (
-                    <div className="ml-auto w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                    <div className="ml-auto w-5 h-5 rounded-full bg-[#ffd600] flex items-center justify-center flex-shrink-0">
                       <Check size={12} className="text-white" />
                     </div>
                   )}
@@ -202,14 +205,14 @@ export function Onboarding() {
                   onClick={() => toggleInteres(i.value)}
                   className={`flex items-center gap-2 p-3 rounded-xl border text-left transition-all ${
                     intereses.includes(i.value)
-                      ? 'border-emerald-500 bg-emerald-500/10'
+                      ? 'border-[#ffd600] bg-[#ffd600]/10'
                       : 'border-zinc-800 bg-zinc-800/50 hover:border-zinc-700'
                   }`}
                 >
                   <span className="text-xl">{i.emoji}</span>
                   <p className="text-white text-xs font-medium leading-snug">{i.label}</p>
                   {intereses.includes(i.value) && (
-                    <div className="ml-auto w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                    <div className="ml-auto w-4 h-4 rounded-full bg-[#ffd600] flex items-center justify-center flex-shrink-0">
                       <Check size={10} className="text-white" />
                     </div>
                   )}
@@ -242,17 +245,17 @@ export function Onboarding() {
                     className={`flex flex-col items-center gap-1 flex-1 ${i === 0 ? 'opacity-100' : 'opacity-30'}`}
                   >
                     <span className="text-lg">{emoji}</span>
-                    <div className={`w-full h-0.5 rounded ${i === 0 ? 'bg-emerald-500' : 'bg-zinc-700'}`} />
+                    <div className={`w-full h-0.5 rounded ${i === 0 ? 'bg-[#ffd600]' : 'bg-zinc-700'}`} />
                   </div>
                 ))}
               </div>
             </div>
 
             {/* XP bonus notice */}
-            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 flex items-center gap-3">
+            <div className="bg-[#ffd600]/10 border border-[#ffd600]/30 rounded-xl p-3 flex items-center gap-3">
               <span className="text-2xl">🎉</span>
               <div className="text-left">
-                <p className="text-emerald-400 font-semibold text-sm">+50 XP de bienvenida</p>
+                <p className="text-[#ffd600] font-semibold text-sm">+50 XP de bienvenida</p>
                 <p className="text-zinc-400 text-xs">Se acreditarán al confirmar</p>
               </div>
             </div>
@@ -279,7 +282,7 @@ export function Onboarding() {
             disabled={!canNext && step !== 3}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl font-medium text-sm transition-all active:scale-95 ${
               canNext || step === 3
-                ? 'bg-emerald-500 hover:bg-emerald-400 text-white'
+                ? 'bg-[#ffd600] hover:bg-[#ffe033] text-zinc-950'
                 : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
             }`}
           >

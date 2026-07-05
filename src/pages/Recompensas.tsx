@@ -1,9 +1,13 @@
-import { useState } from 'react'
+import { useState, lazy, Suspense } from 'react'
 import { AppLayout } from '../components/layout/AppLayout'
 import { useApp } from '../store/AppContext'
 import { LOGROS_DEF, type CategoriaLogro } from '../utils/logros'
 import { getRangoInfo } from '../utils/xp'
-import { Lock } from 'lucide-react'
+import { Lock, Maximize2 } from 'lucide-react'
+import type { MerchProductId } from '../components/merch/Merch3DViewer'
+const Merch3DViewer = lazy(() =>
+  import('../components/merch/Merch3DViewer').then(m => ({ default: m.Merch3DViewer }))
+)
 
 const CATEGORIAS: { id: CategoriaLogro; label: string; emoji: string }[] = [
   { id: 'racha', label: 'Racha', emoji: '🔥' },
@@ -25,60 +29,93 @@ const GANAR_CREDITOS = [
   { accion: 'Logro desbloqueado', icono: '🏆', cantidad: 'Varía', desc: '30 – 10,000 créditos' },
 ]
 
-const MERCH = [
-  { id: 'taza', nombre: 'Taza CIMA', descripcion: 'Cerámica premium 350ml. Logo M impreso a color. Edición Élite exclusiva.', bg: 'from-zinc-800 to-zinc-900', emoji: '☕' },
-  { id: 'remera', nombre: 'Remera Élite', descripcion: 'Algodón 100% premium. Logo M bordado en el pecho. Disponible en blanco y negro.', bg: 'from-zinc-700 to-zinc-900', emoji: '👕' },
-  { id: 'hoodie', nombre: 'Hoodie Mentes Millonarias', descripcion: 'Polar premium 380g. Logo M bordado al frente. Edición limitada.', bg: 'from-zinc-800 to-zinc-950', emoji: '🧥' },
-  { id: 'cuadro', nombre: 'Cuadro Motivacional', descripcion: 'Impresión A3 en papel fotográfico. Marco madera negra incluido. Firmado.', bg: 'from-zinc-700 to-zinc-800', emoji: '🖼️' },
+const MERCH: { id: MerchProductId; nombre: string; descripcion: string; emoji: string }[] = [
+  { id: 'hoodie', nombre: 'Hoodie Mentes Millonarias', emoji: '🧥', descripcion: 'Polar premium 380g. Logo M bordado al frente. Edición limitada.' },
 ]
 
-function MerchCard({ item, unlocked }: { item: typeof MERCH[0]; unlocked: boolean }) {
+function MerchCard({
+  item,
+  unlocked,
+  onView,
+}: {
+  item: typeof MERCH[0]
+  unlocked: boolean
+  onView: () => void
+}) {
   return (
-    <div className={`bg-zinc-900 border rounded-2xl overflow-hidden transition-all ${unlocked ? 'border-[#ffd600]/30 shadow-lg shadow-[#ffd600]/5' : 'border-zinc-800'}`}>
-      {/* Visual mockup */}
-      <div className={`aspect-[4/3] bg-gradient-to-br ${item.bg} flex items-center justify-center relative overflow-hidden`}>
-        <span className="absolute text-[140px] opacity-[0.035] select-none pointer-events-none leading-none">{item.emoji}</span>
-        {/* Main M logo */}
-        <div className="flex flex-col items-center gap-3 relative z-10">
-          <div className={`w-20 h-20 rounded-full flex items-center justify-center shadow-2xl ring-4 transition-all ${
-            unlocked
-              ? 'bg-[#ffd600] ring-[#ffd600]/20 shadow-[#ffd600]/25'
-              : 'bg-zinc-700 ring-zinc-700/20'
-          }`}>
-            <span className={`font-black text-4xl leading-none select-none ${unlocked ? 'text-zinc-950' : 'text-zinc-500'}`}>M</span>
-          </div>
-          <p className={`text-[10px] tracking-[0.25em] uppercase font-bold ${unlocked ? 'text-white/35' : 'text-white/10'}`}>
-            Mentes Millonarias
-          </p>
+    <div
+      onClick={onView}
+      className={`group relative bg-zinc-900 border rounded-2xl overflow-hidden cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.99] ${
+        unlocked ? 'border-[#ffd600]/25 shadow-lg shadow-[#ffd600]/5 hover:border-[#ffd600]/50' : 'border-zinc-800 hover:border-zinc-700'
+      }`}
+    >
+      {/* Preview area */}
+      <div className={`aspect-[4/3] flex flex-col items-center justify-center relative overflow-hidden ${
+        unlocked ? 'bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950' : 'bg-zinc-900'
+      }`}>
+        {/* Big emoji */}
+        <span className={`text-7xl mb-3 transition-transform duration-300 group-hover:scale-110 ${unlocked ? '' : 'grayscale opacity-40'}`}>
+          {item.emoji}
+        </span>
+        {/* M logo badge */}
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+          unlocked ? 'bg-[#ffd600] shadow-lg shadow-[#ffd600]/30' : 'bg-zinc-700'
+        }`}>
+          <span className={`font-black text-xl leading-none ${unlocked ? 'text-zinc-950' : 'text-zinc-500'}`}>M</span>
         </div>
-        {/* Elite badge / locked overlay */}
-        {unlocked ? (
+
+        {/* "Ver en 3D" hover overlay */}
+        <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-all duration-200">
+          <div className="opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-2">
+            <Maximize2 size={14} className="text-white" />
+            <span className="text-white text-xs font-semibold">Ver en 3D</span>
+          </div>
+        </div>
+
+        {/* Elite badge */}
+        {unlocked && (
           <div className="absolute top-3 left-3">
             <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-[#ffd600]/15 border border-[#ffd600]/30 text-[#ffd600]">
               👑 ÉLITE
             </span>
           </div>
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-zinc-950/55 backdrop-blur-[2px]">
-            <div className="text-center">
-              <Lock size={26} className="text-zinc-600 mx-auto mb-2" />
-              <p className="text-zinc-500 text-xs font-medium">Rango Élite requerido</p>
-            </div>
+        )}
+        {/* Locked */}
+        {!unlocked && (
+          <div className="absolute top-3 left-3">
+            <span className="text-[10px] font-medium px-2 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-500">
+              <Lock size={9} className="inline mr-1" />Bloqueado
+            </span>
           </div>
         )}
       </div>
+
       {/* Info */}
       <div className="p-4">
         <h4 className="text-white font-semibold mb-1 text-sm">{item.nombre}</h4>
         <p className="text-zinc-500 text-xs mb-3 leading-relaxed">{item.descripcion}</p>
         {unlocked ? (
-          <button className="w-full py-2.5 rounded-xl bg-[#ffd600] hover:bg-[#ffe033] text-zinc-950 font-bold text-sm transition-colors active:scale-95">
-            🎁 Reclamar merch gratis
-          </button>
-        ) : (
-          <div className="w-full py-2 rounded-xl bg-zinc-800 border border-zinc-700/50 text-zinc-600 text-xs text-center font-medium">
-            🔒 Alcanzá Élite para desbloquear
+          <div className="flex gap-2">
+            <button
+              onClick={(e) => { e.stopPropagation(); onView() }}
+              className="flex-1 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-medium transition-colors flex items-center justify-center gap-1.5"
+            >
+              <Maximize2 size={12} /> Ver en 3D
+            </button>
+            <button
+              onClick={(e) => e.stopPropagation()}
+              className="flex-1 py-2 rounded-xl bg-[#ffd600] hover:bg-[#ffe033] text-zinc-950 font-bold text-xs transition-colors active:scale-95"
+            >
+              🎁 Reclamar
+            </button>
           </div>
+        ) : (
+          <button
+            onClick={(e) => { e.stopPropagation(); onView() }}
+            className="w-full py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700/50 text-zinc-400 text-xs font-medium transition-colors flex items-center justify-center gap-1.5"
+          >
+            <Maximize2 size={12} /> Vista previa 3D
+          </button>
         )}
       </div>
     </div>
@@ -89,6 +126,7 @@ export function Recompensas() {
   const { state } = useApp()
   const [categoriaActiva, setCategoriaActiva] = useState<CategoriaLogro>('racha')
   const [showHistorial, setShowHistorial] = useState(false)
+  const [viewing, setViewing] = useState<MerchProductId | null>(null)
 
   const rangoInfo = getRangoInfo(state.xp.total)
   const isElite = rangoInfo.rango === 'Élite'
@@ -101,6 +139,7 @@ export function Recompensas() {
   const pctLogros = totalLogros > 0 ? Math.round((totalDesbloqueados / totalLogros) * 100) : 0
 
   return (
+    <>
     <AppLayout titulo="Recompensas">
       <div className="space-y-5 max-w-5xl animate-fade-in">
 
@@ -262,11 +301,24 @@ export function Recompensas() {
               : `Alcanzá el rango Élite (20,000 XP — te faltan ${Math.max(0, 20000 - state.xp.total).toLocaleString('es-AR')} XP) y recibís merch gratis de Mentes Millonarias.`}
           </p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            {MERCH.map(item => <MerchCard key={item.id} item={item} unlocked={isElite} />)}
+            {MERCH.map(item => (
+              <MerchCard key={item.id} item={item} unlocked={isElite} onView={() => setViewing(item.id)} />
+            ))}
           </div>
         </div>
 
       </div>
     </AppLayout>
+    {viewing && (
+      <Suspense fallback={null}>
+        <Merch3DViewer
+          productId={viewing}
+          productName={MERCH.find(m => m.id === viewing)!.nombre}
+          gold={isElite}
+          onClose={() => setViewing(null)}
+        />
+      </Suspense>
+    )}
+    </>
   )
 }

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -51,6 +51,104 @@
   .safe-area-pb {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
+}
+
+/* ─── Cinematic Landing ─────��────────────────────────────────────────────────── */
+
+/* Grain / film noise overlay */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: -50%;
+  width: 200%;
+  height: 200%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity: 0.045;
+  pointer-events: none;
+  z-index: 9999;
+  animation: grainShift 8s steps(10) infinite;
+}
+
+@keyframes grainShift {
+  0%  { transform: translate(0, 0); }
+  10% { transform: translate(-2%, -3%); }
+  20% { transform: translate(4%, 1%); }
+  30% { transform: translate(-1%, 4%); }
+  40% { transform: translate(3%, -2%); }
+  50% { transform: translate(-3%, 3%); }
+  60% { transform: translate(1%, -4%); }
+  70% { transform: translate(-4%, 1%); }
+  80% { transform: translate(2%, 3%); }
+  90% { transform: translate(-2%, -1%); }
+  100%{ transform: translate(0, 0); }
+}
+
+/* Star field */
+.stars {
+  background-image:
+    radial-gradient(ellipse 1px 1px at 20% 15%,  rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(ellipse 1px 1px at 55% 8%,   rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(ellipse 1px 1px at 75% 25%,  rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(ellipse 1px 1px at 10% 40%,  rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(ellipse 1px 1px at 88% 12%,  rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(ellipse 1px 1px at 35% 60%,  rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(ellipse 1px 1px at 65% 45%,  rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(ellipse 1px 1px at 92% 70%,  rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(ellipse 1px 1px at 5%  75%,  rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(ellipse 1px 1px at 48% 85%,  rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(ellipse 1.5px 1.5px at 30% 30%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(ellipse 1.5px 1.5px at 70% 70%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(ellipse 2px 2px at 15% 90%,  rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(ellipse 2px 2px at 80% 50%,  rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(ellipse 1px 1px at 42% 20%,  rgba(255,214,0,0.4) 0%, transparent 100%),
+    radial-gradient(ellipse 1px 1px at 60% 88%,  rgba(255,214,0,0.3) 0%, transparent 100%);
+}
+
+/* Gold gradient border trick */
+.gold-border-card {
+  position: relative;
+  background: #111113;
+  border-radius: 20px;
+}
+.gold-border-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 21px;
+  background: linear-gradient(135deg, rgba(255,214,0,0.8), rgba(255,140,0,0.4), rgba(255,214,0,0.6));
+  z-index: -1;
+}
+
+/* Initial hidden state for fade-up animations */
+.reveal {
+  opacity: 0;
+}
+
+/* Shimmer text */
+.shimmer-text {
+  background: linear-gradient(90deg, #ffd600 0%, #fff8c5 40%, #ffd600 60%, #ffb300 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 3s linear infinite;
+}
+
+/* Scanline effect on mockup */
+.scanlines::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 2;
+  border-radius: inherit;
 }
 
 /* ─── Light mode overrides ─────────────────────────────────────────────────── */

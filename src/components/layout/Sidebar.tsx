@@ -137,7 +137,7 @@ export function Sidebar() {
 
       {/* Footer */}
       <div className="px-6 py-4 border-t border-zinc-800">
-        <p className="text-zinc-600 text-xs">CIMA v0.3 · Mentes Millonarias</p>
+        <p className="text-zinc-600 text-xs">CIMA · Tu sistema operativo personal</p>
       </div>
     </aside>
   )
