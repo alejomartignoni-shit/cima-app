@@ -32,12 +32,10 @@ import { Onboarding } from './pages/Onboarding'
 import { Proyeccion } from './pages/Proyeccion'
 import { Dashboards } from './pages/Dashboards'
 import { Recompensas } from './pages/Recompensas'
-import { Landing } from './pages/Landing'
-
 function OnboardingGuard({ children }: { children: React.ReactNode }) {
   const { state } = useApp()
   if (!state.perfil?.onboardingCompletado) {
-    return <Navigate to="/landing" replace />
+    return <Navigate to="/onboarding" replace />
   }
   return <>{children}</>
 }
@@ -45,7 +43,6 @@ function OnboardingGuard({ children }: { children: React.ReactNode }) {
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/landing" element={<Landing />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/" element={<OnboardingGuard><Home /></OnboardingGuard>} />
       <Route path="/transacciones" element={<OnboardingGuard><Transacciones /></OnboardingGuard>} />

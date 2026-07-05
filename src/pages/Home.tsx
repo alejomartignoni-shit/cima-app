@@ -112,12 +112,12 @@ export function Home() {
           <div className="absolute right-0 top-0 w-64 h-64 rounded-full opacity-10 pointer-events-none"
             style={{ background: 'radial-gradient(circle, #10b981 0%, transparent 70%)', transform: 'translate(30%, -30%)' }} />
 
-          <div className="flex items-start justify-between">
-            <div>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
               <p className="text-emerald-400/70 text-xs font-semibold uppercase tracking-widest mb-2">
                 Balance — {formatearMes(mesRef)}
               </p>
-              <p className={`text-4xl font-black tracking-tight ${balance >= 0 ? 'text-white' : 'text-rose-400'}`}>
+              <p className={`text-3xl sm:text-4xl font-black tracking-tight ${balance >= 0 ? 'text-white' : 'text-rose-400'}`}>
                 {formatearMonto(balance)}
               </p>
               {ingresos > 0 && (
@@ -131,14 +131,14 @@ export function Home() {
             <div className="flex gap-2 flex-shrink-0">
               <button
                 onClick={() => navigate('/transacciones')}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-zinc-950 transition-all hover:scale-105 active:scale-95"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-950 transition-all hover:scale-105 active:scale-95"
                 style={{ background: '#10b981' }}
               >
                 <Plus size={13} /> Agregar
               </button>
               <button
                 onClick={() => navigate('/proyeccion')}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 transition-all hover:bg-emerald-500/20"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 transition-all hover:bg-emerald-500/20"
               >
                 <ArrowRight size={13} /> Proyección
               </button>
@@ -254,9 +254,9 @@ export function Home() {
         </div>
 
         {/* ── 3. Stat cards ──────────────────────────────────────────────── */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
           {/* Ahorro neto */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-5">
             <div className="flex items-center justify-between mb-3">
               <p className="text-zinc-400 text-xs font-medium">Ahorro neto</p>
               <span className="text-zinc-600 text-xs">{formatearMes(mesRef)}</span>
@@ -272,7 +272,7 @@ export function Home() {
           </div>
 
           {/* Total acumulado */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-5">
             <div className="flex items-center justify-between mb-3">
               <p className="text-zinc-400 text-xs font-medium">Total acumulado</p>
               <span className="text-zinc-600 text-xs">Histórico</span>
@@ -286,8 +286,8 @@ export function Home() {
             </div>
           </div>
 
-          {/* Racha / Actividad */}
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
+          {/* Racha / Actividad — spans full width on 2-col mobile layout */}
+          <div className="col-span-2 sm:col-span-1 bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-5">
             <div className="flex items-center justify-between mb-3">
               <p className="text-zinc-400 text-xs font-medium">Racha activa</p>
               <span className="text-zinc-600 text-xs">{formatearMes(mes)}</span>
@@ -327,17 +327,17 @@ export function Home() {
             ) : (
               <div>
                 {/* Table header */}
-                <div className="grid grid-cols-[1fr_auto_auto_auto] gap-4 px-5 py-2.5 border-b border-zinc-800/60">
+                <div className="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_auto_auto] gap-3 sm:gap-4 px-5 py-2.5 border-b border-zinc-800/60">
                   <span className="text-zinc-600 text-[11px] uppercase tracking-wide font-semibold">Detalle</span>
                   <span className="text-zinc-600 text-[11px] uppercase tracking-wide font-semibold">Monto</span>
-                  <span className="text-zinc-600 text-[11px] uppercase tracking-wide font-semibold">Tipo</span>
-                  <span className="text-zinc-600 text-[11px] uppercase tracking-wide font-semibold">Método</span>
+                  <span className="hidden sm:block text-zinc-600 text-[11px] uppercase tracking-wide font-semibold">Tipo</span>
+                  <span className="hidden sm:block text-zinc-600 text-[11px] uppercase tracking-wide font-semibold">Nota</span>
                 </div>
 
                 {recentTx.map((tx, i) => (
                   <div
                     key={tx.id}
-                    className={`grid grid-cols-[1fr_auto_auto_auto] gap-4 px-5 py-3.5 items-center hover:bg-zinc-800/30 transition-colors ${
+                    className={`grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_auto_auto] gap-3 sm:gap-4 px-5 py-3.5 items-center hover:bg-zinc-800/30 transition-colors ${
                       i < recentTx.length - 1 ? 'border-b border-zinc-800/40' : ''
                     }`}
                   >
@@ -345,11 +345,11 @@ export function Home() {
                       <p className="text-zinc-200 text-sm font-medium truncate">{tx.categoria}</p>
                       <p className="text-zinc-600 text-xs mt-0.5">{formatearFecha(tx.fecha)}</p>
                     </div>
-                    <span className={`text-sm font-semibold tabular-nums ${tx.tipo === 'ingreso' ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    <span className={`text-sm font-semibold tabular-nums flex-shrink-0 ${tx.tipo === 'ingreso' ? 'text-emerald-400' : 'text-rose-400'}`}>
                       {tx.tipo === 'ingreso' ? '+' : '-'}{formatearMonto(tx.monto)}
                     </span>
-                    <StatusBadge tipo={tx.tipo} />
-                    <span className="text-zinc-500 text-xs">{tx.nota ? tx.nota.slice(0, 12) : '—'}</span>
+                    <span className="hidden sm:block"><StatusBadge tipo={tx.tipo} /></span>
+                    <span className="hidden sm:block text-zinc-500 text-xs">{tx.nota ? tx.nota.slice(0, 12) : '—'}</span>
                   </div>
                 ))}
               </div>

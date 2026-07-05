@@ -10,7 +10,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children, titulo }: AppLayoutProps) {
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 overflow-x-hidden">
       <Sidebar />
 
       {/* Main content area — offset by sidebar on desktop */}
