@@ -1,0 +1,11 @@
+Model Information:
+* title:	Female tshirt
+* source:	https://sketchfab.com/3d-models/female-tshirt-d32121811fc642a6b89b8daf05802ff1
+* author:	alnmathew (https://sketchfab.com/alnmathew)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Female tshirt" (https://sketchfab.com/3d-models/female-tshirt-d32121811fc642a6b89b8daf05802ff1) by alnmathew (https://sketchfab.com/alnmathew) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
