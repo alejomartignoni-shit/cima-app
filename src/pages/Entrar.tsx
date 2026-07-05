@@ -1,13 +1,11 @@
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Navigate } from 'react-router-dom'
 import { useApp } from '../store/AppContext'
 import { hoy } from '../utils/formatters'
 
-// Direct-access route — skips onboarding, goes straight to dashboard.
-// Use this link to share the app with people who don't need the sales flow.
 export function Entrar() {
   const { dispatch, state } = useApp()
-  const navigate = useNavigate()
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     if (!state.perfil?.onboardingCompletado) {
@@ -23,8 +21,11 @@ export function Entrar() {
         },
       })
     }
-    navigate('/', { replace: true })
+    // Wait one tick so the state update commits before we navigate
+    setReady(true)
   }, [])
+
+  if (ready) return <Navigate to="/" replace />
 
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
