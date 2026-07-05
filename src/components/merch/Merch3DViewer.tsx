@@ -1,22 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
 import type { OrbitControls as OrbitControlsType } from 'three/examples/jsm/controls/OrbitControls.js'
-import { X, RotateCcw } from 'lucide-react'
+import { X, RotateCcw, ChevronUp } from 'lucide-react'
 
 export type MerchProductId = 'hoodie'
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 interface Colors { body: string; accent: string }
 interface Colorway { name: string; colors: Colors }
 
-// ── Colorway presets ──────────────────────────────────────────────────────────
 const COLORWAYS: Colorway[] = [
-  { name: 'Negro Total',    colors: { body: '#111111', accent: '#1e1e1e' } },
-  { name: 'Gris Carbono',   colors: { body: '#2a2a2e', accent: '#1e1e22' } },
-  { name: 'Azul Royal',     colors: { body: '#1a3566', accent: '#0f2040' } },
-  { name: 'Verde Élite',    colors: { body: '#0f3020', accent: '#081c12' } },
-  { name: 'Gris Titanio',   colors: { body: '#4a4a52', accent: '#2e2e35' } },
-  { name: 'Burdó',          colors: { body: '#5c1a24', accent: '#3a0f17' } },
+  { name: 'Negro Total',  colors: { body: '#111111', accent: '#1e1e1e' } },
+  { name: 'Gris Carbono', colors: { body: '#2a2a2e', accent: '#1e1e22' } },
+  { name: 'Azul Royal',   colors: { body: '#1a3566', accent: '#0f2040' } },
+  { name: 'Verde Élite',  colors: { body: '#0f3020', accent: '#081c12' } },
+  { name: 'Gris Titanio', colors: { body: '#4a4a52', accent: '#2e2e35' } },
+  { name: 'Burdó',        colors: { body: '#5c1a24', accent: '#3a0f17' } },
 ]
 
 const LAYER_PALETTES: Record<keyof Colors, string[]> = {
@@ -29,17 +27,13 @@ const PARTS: Record<keyof Colors, string> = {
   accent: 'Falda',
 }
 
-// ── Model path ────────────────────────────────────────────────────────────────
 const BASE = import.meta.env.BASE_URL
 const MODEL_PATH = `${BASE}models/hoodie-f/scene.gltf`
 
-// ── Material name → color key mapping ────────────────────────────────────────
-// "parker" = hoodie body, "skirt" = the skirt/bottom piece
 function colorKeyForMat(matName: string): keyof Colors {
   return matName.toLowerCase().includes('skirt') ? 'accent' : 'body'
 }
 
-// ── Scene ref ─────────────────────────────────────────────────────────────────
 interface SceneState {
   scene: THREE.Scene
   renderer: THREE.WebGLRenderer
@@ -48,7 +42,6 @@ interface SceneState {
   matMap: Map<THREE.MeshStandardMaterial, keyof Colors>
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
 interface Props {
   productId: MerchProductId
   productName: string
@@ -58,15 +51,16 @@ interface Props {
 
 export function Merch3DViewer({ productName, gold, onClose }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const sceneRef = useRef<SceneState | null>(null)
+  const sceneRef  = useRef<SceneState | null>(null)
 
-  const [cwIdx, setCwIdx] = useState(0)
-  const [colors, setColors] = useState<Colors>(COLORWAYS[0].colors)
+  const [cwIdx, setCwIdx]           = useState(0)
+  const [colors, setColors]         = useState<Colors>(COLORWAYS[0].colors)
   const [activeLayer, setActiveLayer] = useState<keyof Colors>('body')
-  const [loaded, setLoaded] = useState(false)
-  const [loadError, setLoadError] = useState<string | null>(null)
+  const [loaded, setLoaded]         = useState(false)
+  const [loadError, setLoadError]   = useState<string | null>(null)
+  const [panelOpen, setPanelOpen]   = useState(false)
 
-  // ── Init scene ───────────────────────────────────────────────────────────────
+  // ── Init Three.js scene ──────────────────────────────────────────────────────
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -83,7 +77,6 @@ export function Merch3DViewer({ productName, gold, onClose }: Props) {
       ])
       if (destroyed) return
 
-      // Renderer
       const renderer = new THREE.WebGLRenderer({ canvas: el, antialias: true })
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
       renderer.setSize(el.clientWidth, el.clientHeight)
@@ -93,41 +86,34 @@ export function Merch3DViewer({ productName, gold, onClose }: Props) {
       renderer.toneMappingExposure = 1.3
       renderer.outputColorSpace = THREE.SRGBColorSpace
 
-      // Scene
       const scene = new THREE.Scene()
       scene.background = new THREE.Color('#0c0c0f')
       scene.fog = new THREE.FogExp2('#0c0c0f', 0.045)
 
-      // Camera
       const camera = new THREE.PerspectiveCamera(38, el.clientWidth / el.clientHeight, 0.1, 80)
       camera.position.set(0, 0.5, 6)
 
-      // Lights
       scene.add(new THREE.AmbientLight('#ffffff', 0.25))
       const key = new THREE.SpotLight('#fff6e0', 130); key.position.set(3.5, 5, 5); key.angle = 0.34; key.penumbra = 0.55; key.castShadow = true; key.shadow.mapSize.setScalar(1024); scene.add(key); scene.add(key.target)
       const fill = new THREE.SpotLight('#b8d4ff', 28); fill.position.set(-3, 3, 4); fill.angle = 0.55; fill.penumbra = 0.8; scene.add(fill)
-      const rim = new THREE.SpotLight('#6050e8', 65); rim.position.set(-2, 4, -5); rim.angle = 0.36; rim.penumbra = 0.5; scene.add(rim)
-      const top = new THREE.SpotLight('#4040cc', 22); top.position.set(0, 8, -3); top.angle = 0.3; top.penumbra = 0.7; scene.add(top)
+      const rim  = new THREE.SpotLight('#6050e8', 65); rim.position.set(-2, 4, -5); rim.angle = 0.36; rim.penumbra = 0.5; scene.add(rim)
+      const top  = new THREE.SpotLight('#4040cc', 22); top.position.set(0, 8, -3);  top.angle = 0.3;  top.penumbra = 0.7; scene.add(top)
 
-      // Shadow plane
       const sp = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.ShadowMaterial({ opacity: 0.3 }))
       sp.rotation.x = -Math.PI / 2; sp.position.y = -2.5; sp.receiveShadow = true; scene.add(sp)
-      // Reflective ground disc
       const gd = new THREE.Mesh(new THREE.CircleGeometry(1.8, 48), new THREE.MeshStandardMaterial({ color: '#14141a', roughness: 0.1, metalness: 0.7 }))
       gd.rotation.x = -Math.PI / 2; gd.position.y = -2.51; scene.add(gd)
 
       const gltf = await new Promise<{ scene: THREE.Group }>((res, rej) => {
-        const loader = new GLTFLoader()
-        loader.load(MODEL_PATH, res as never, undefined, rej)
+        new GLTFLoader().load(MODEL_PATH, res as never, undefined, rej)
       })
       if (destroyed) return
 
       const model = gltf.scene
-      const box = new THREE.Box3().setFromObject(model)
+      const box   = new THREE.Box3().setFromObject(model)
       const center = box.getCenter(new THREE.Vector3())
-      const size = box.getSize(new THREE.Vector3())
-      const maxDim = Math.max(size.x, size.y, size.z)
-      const scale = 3.2 / maxDim
+      const size   = box.getSize(new THREE.Vector3())
+      const scale  = 3.2 / Math.max(size.x, size.y, size.z)
 
       model.position.sub(center)
       const wrapper = new THREE.Group()
@@ -139,20 +125,24 @@ export function Merch3DViewer({ productName, gold, onClose }: Props) {
       const initColors = COLORWAYS[0].colors
 
       model.traverse(n => {
-        if (n instanceof THREE.Mesh) {
-          n.castShadow = true
-          n.receiveShadow = true
-          const mat = n.material as THREE.MeshStandardMaterial
-          if (mat && mat.isMeshStandardMaterial) {
-            const key = colorKeyForMat(mat.name)
-            mat.color.set(initColors[key])
-            mat.needsUpdate = true
-            matMap.set(mat, key)
-          }
-        }
+        if (!(n instanceof THREE.Mesh)) return
+        n.castShadow = true
+        n.receiveShadow = true
+        const mat = n.material as THREE.MeshStandardMaterial
+        if (!mat?.isMeshStandardMaterial) return
+
+        // Remove the base color texture so mat.color shows as a clean solid.
+        // Normal/roughness maps stay — they keep the 3D lighting detail.
+        mat.map = null
+        mat.transparent = false
+        mat.alphaTest = 0
+
+        const colorKey = colorKeyForMat(mat.name)
+        mat.color.set(initColors[colorKey])
+        mat.needsUpdate = true
+        matMap.set(mat, colorKey)
       })
 
-      // OrbitControls
       controls = new OrbitControls(camera, el)
       controls.enablePan = false
       controls.minDistance = 3; controls.maxDistance = 10
@@ -160,7 +150,6 @@ export function Merch3DViewer({ productName, gold, onClose }: Props) {
       controls.enableDamping = true; controls.dampingFactor = 0.06
       controls.minPolarAngle = Math.PI * 0.1; controls.maxPolarAngle = Math.PI * 0.85
 
-      // Animate
       let t = 0
       function animate() {
         animId = requestAnimationFrame(animate)
@@ -171,7 +160,6 @@ export function Merch3DViewer({ productName, gold, onClose }: Props) {
       }
       animate()
 
-      // Resize
       const onResize = () => {
         camera.aspect = el.clientWidth / el.clientHeight
         camera.updateProjectionMatrix()
@@ -198,23 +186,22 @@ export function Merch3DViewer({ productName, gold, onClose }: Props) {
 
     let cleanup: (() => void) | undefined
     init().then(fn => { cleanup = fn }).catch(err => {
-      console.error('Merch3DViewer init error:', err)
       setLoadError(String(err?.message ?? err))
     })
     return () => { destroyed = true; cleanup?.(); cancelAnimationFrame(animId) }
   }, [])
 
-  // ── Live color updates ────────────────────────────────────────────────────────
+  // ── Live color update ────────────────────────────────────────────────────────
   useEffect(() => {
     const ref = sceneRef.current
     if (!ref || !loaded) return
-    ref.matMap.forEach((key, mat) => {
-      mat.color.set(colors[key])
+    // Map<material, colorKey> — forEach(value, key)
+    ref.matMap.forEach((colorKey, mat) => {
+      mat.color.set(colors[colorKey])
       mat.needsUpdate = true
     })
   }, [colors, loaded])
 
-  // ── UI handlers ───────────────────────────────────────────────────────────────
   function applyColorway(idx: number) {
     setCwIdx(idx); setColors(COLORWAYS[idx].colors)
   }
@@ -222,12 +209,70 @@ export function Merch3DViewer({ productName, gold, onClose }: Props) {
     setColors(prev => ({ ...prev, [activeLayer]: hex })); setCwIdx(-1)
   }
 
+  // ── Render ───────────────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-50 flex bg-[#0c0c0f]">
-      {/* ── Left panel ─────────────────────────────────────────────────────── */}
-      <div className="w-72 flex-shrink-0 flex flex-col border-r border-zinc-800/60 bg-[#0e0e12] overflow-hidden">
-        {/* Header */}
-        <div className="flex items-start justify-between p-5 border-b border-zinc-800/60">
+    <div className="fixed inset-0 z-50 bg-[#0c0c0f] flex flex-col lg:flex-row">
+
+      {/* ── 3D Canvas — top on mobile, right on desktop ─────────────────────── */}
+      <div className="flex-1 relative overflow-hidden min-h-0 order-1 lg:order-2">
+        <canvas ref={canvasRef} className="w-full h-full block" />
+
+        {!loaded && (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#0c0c0f]">
+            {loadError ? (
+              <>
+                <p className="text-red-400 text-sm font-semibold">Error al cargar</p>
+                <p className="text-zinc-600 text-xs max-w-xs text-center">{loadError}</p>
+              </>
+            ) : (
+              <>
+                <div className="w-8 h-8 border-2 border-[#ffd600]/30 border-t-[#ffd600] rounded-full animate-spin" />
+                <p className="text-zinc-500 text-xs">Cargando modelo 3D…</p>
+              </>
+            )}
+          </div>
+        )}
+
+        {loaded && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-none">
+            <div className="bg-black/50 backdrop-blur-sm border border-white/8 rounded-full px-4 py-2">
+              <p className="text-zinc-500 text-xs">Arrastrá para rotar · Scroll para zoom</p>
+            </div>
+          </div>
+        )}
+
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(96,80,232,0.06) 0%, transparent 70%)' }} />
+        </div>
+      </div>
+
+      {/* ── Panel — bottom sheet on mobile, left sidebar on desktop ─────────── */}
+      <div className={[
+        'order-2 lg:order-1',
+        'w-full lg:w-72 flex-shrink-0',
+        'flex flex-col',
+        'border-t lg:border-t-0 lg:border-r border-zinc-800/60 bg-[#0e0e12]',
+        'transition-[height] duration-300 ease-out',
+        'lg:h-full lg:overflow-y-auto',
+        // Mobile: collapsed = just the handle (h-14), open = 58% of screen
+        panelOpen ? 'h-[58%] overflow-y-auto' : 'h-14 overflow-hidden',
+      ].join(' ')}>
+
+        {/* Mobile toggle handle (hidden on desktop) */}
+        <button
+          onClick={() => setPanelOpen(p => !p)}
+          className="lg:hidden flex items-center justify-between px-5 h-14 flex-shrink-0 w-full"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-4 h-4 rounded-full border-2 border-zinc-600" style={{ background: colors[activeLayer] }} />
+            <span className="text-white text-sm font-semibold">Personalizar</span>
+          </div>
+          <ChevronUp size={16} className={`text-zinc-500 transition-transform duration-300 ${panelOpen ? '' : 'rotate-180'}`} />
+        </button>
+
+        {/* Header (desktop only) */}
+        <div className="hidden lg:flex items-start justify-between p-5 border-b border-zinc-800/60 flex-shrink-0">
           <div>
             <p className="text-[10px] text-zinc-600 uppercase tracking-widest font-semibold mb-1">CIMA × Mentes Millonarias</p>
             <h2 className="text-white font-bold text-base leading-tight">{productName}</h2>
@@ -236,8 +281,17 @@ export function Merch3DViewer({ productName, gold, onClose }: Props) {
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-zinc-800 transition-colors text-zinc-500 hover:text-white"><X size={18} /></button>
         </div>
 
+        {/* Close button mobile (inside panel) */}
+        <div className="lg:hidden flex items-center justify-between px-5 py-2 border-t border-zinc-800/40 flex-shrink-0">
+          <div>
+            <p className="text-[10px] text-zinc-600 uppercase tracking-widest font-semibold">CIMA × Mentes Millonarias</p>
+            <p className="text-white text-sm font-bold mt-0.5">{productName}</p>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-zinc-800 transition-colors text-zinc-500 hover:text-white"><X size={18} /></button>
+        </div>
+
         {/* Colorways */}
-        <div className="p-5 border-b border-zinc-800/60">
+        <div className="p-4 lg:p-5 border-b border-zinc-800/60 flex-shrink-0">
           <p className="text-[10px] text-zinc-600 uppercase tracking-widest font-semibold mb-3">Colorway</p>
           <div className="flex flex-wrap gap-2.5">
             {COLORWAYS.map((cw, i) => (
@@ -252,7 +306,7 @@ export function Merch3DViewer({ productName, gold, onClose }: Props) {
         </div>
 
         {/* Per-layer color */}
-        <div className="p-5 border-b border-zinc-800/60 flex-1 overflow-y-auto">
+        <div className="p-4 lg:p-5 border-b border-zinc-800/60 flex-shrink-0">
           <p className="text-[10px] text-zinc-600 uppercase tracking-widest font-semibold mb-3">Personalizar</p>
           <div className="flex flex-col gap-1.5 mb-4">
             {(Object.entries(PARTS) as [keyof Colors, string][]).map(([key, label]) => (
@@ -281,7 +335,7 @@ export function Merch3DViewer({ productName, gold, onClose }: Props) {
         </div>
 
         {/* Reset */}
-        <div className="px-5 py-3 border-b border-zinc-800/60">
+        <div className="px-4 lg:px-5 py-3 border-b border-zinc-800/60 flex-shrink-0">
           <button onClick={() => { setCwIdx(0); setColors(COLORWAYS[0].colors) }}
             className="flex items-center gap-2 text-zinc-600 hover:text-zinc-400 text-xs transition-colors">
             <RotateCcw size={12} /> Resetear diseño
@@ -289,7 +343,7 @@ export function Merch3DViewer({ productName, gold, onClose }: Props) {
         </div>
 
         {/* CTA */}
-        <div className="p-5">
+        <div className="p-4 lg:p-5 flex-shrink-0">
           {gold ? (
             <button className="w-full bg-[#ffd600] hover:bg-[#ffe033] active:scale-95 text-zinc-950 font-black py-3.5 rounded-2xl text-sm transition-all shadow-xl shadow-[#ffd600]/20">
               🎁 Reclamar gratis
@@ -299,43 +353,6 @@ export function Merch3DViewer({ productName, gold, onClose }: Props) {
               Alcanzá rango <span className="text-[#ffd600] font-bold">Élite</span> (20,000 XP) para reclamar tu merch gratis
             </p>
           )}
-        </div>
-      </div>
-
-      {/* ── 3D Canvas ──────────────────────────────────────────────────────── */}
-      <div className="flex-1 relative overflow-hidden">
-        <canvas ref={canvasRef} className="w-full h-full block" />
-
-        {/* Loading / Error */}
-        {!loaded && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#0c0c0f]">
-            {loadError ? (
-              <>
-                <p className="text-red-400 text-sm font-semibold">Error al cargar</p>
-                <p className="text-zinc-600 text-xs max-w-xs text-center">{loadError}</p>
-              </>
-            ) : (
-              <>
-                <div className="w-8 h-8 border-2 border-[#ffd600]/30 border-t-[#ffd600] rounded-full animate-spin" />
-                <p className="text-zinc-500 text-xs">Cargando modelo 3D…</p>
-              </>
-            )}
-          </div>
-        )}
-
-        {/* Hint */}
-        {loaded && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 pointer-events-none">
-            <div className="bg-black/50 backdrop-blur-sm border border-white/8 rounded-full px-4 py-2">
-              <p className="text-zinc-500 text-xs">🖱️ Arrastrá para rotar · Scroll para zoom</p>
-            </div>
-          </div>
-        )}
-
-        {/* Bg glow */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(96,80,232,0.06) 0%, transparent 70%)' }} />
         </div>
       </div>
     </div>
