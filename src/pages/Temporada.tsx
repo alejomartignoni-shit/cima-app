@@ -4,6 +4,7 @@ import { AppLayout } from '../components/layout/AppLayout'
 import { useApp } from '../store/AppContext'
 import { formatXP, getRangoInfo, getProgresoRango, getTemporadaActual, getXPTemporada, getProgresoTemporada, RANGOS } from '../utils/xp'
 import { formatearFecha } from '../utils/formatters'
+import { Reveal } from '../components/ui/Reveal'
 
 export function Temporada() {
   const { state } = useApp()
@@ -109,6 +110,7 @@ export function Temporada() {
         </div>
 
         {/* All ranks grid */}
+        <Reveal>
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
           <p className="text-zinc-500 text-xs font-semibold uppercase tracking-widest mb-4">Todos los rangos</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -157,6 +159,7 @@ export function Temporada() {
             })}
           </div>
         </div>
+        </Reveal>
 
         {/* XP History */}
         {historialReciente.length > 0 && (

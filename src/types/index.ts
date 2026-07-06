@@ -156,6 +156,157 @@ export interface Deuda {
   cuotaMensual?: number
 }
 
+// ─── Fixed costs & subscriptions ──────────────────────────────────────────────
+
+export type CategoriaCostoFijo =
+  | 'Software'
+  | 'Suscripciones'
+  | 'Vivienda'
+  | 'Expensas'
+  | 'Servicios'
+  | 'Transporte'
+  | 'Otro'
+
+export const CATEGORIAS_COSTO_FIJO: CategoriaCostoFijo[] = [
+  'Software',
+  'Suscripciones',
+  'Vivienda',
+  'Expensas',
+  'Servicios',
+  'Transporte',
+  'Otro',
+]
+
+export type FrecuenciaCosto = 'mensual' | 'anual'
+
+export interface CostoFijo {
+  id: string
+  nombre: string
+  categoria: CategoriaCostoFijo
+  monto: number // positive number always
+  frecuencia: FrecuenciaCosto
+  activo: boolean
+  creadoEn: string // YYYY-MM-DD
+  nota?: string
+  negocioId?: string // undefined = personal
+}
+
+// ─── Investments ──────────────────────────────────────────────────────────────
+
+export type TipoInversion =
+  | 'Cripto'
+  | 'Acciones'
+  | 'CEDEARs'
+  | 'Plazo fijo'
+  | 'Fondo común'
+  | 'Dólar'
+  | 'Otro'
+
+export const TIPOS_INVERSION: TipoInversion[] = [
+  'Cripto',
+  'Acciones',
+  'CEDEARs',
+  'Plazo fijo',
+  'Fondo común',
+  'Dólar',
+  'Otro',
+]
+
+export interface Inversion {
+  id: string
+  nombre: string
+  tipo: TipoInversion
+  montoInvertido: number // positive number always
+  valorActual: number // positive number always
+  fecha: string // YYYY-MM-DD (fecha de entrada)
+  nota?: string
+}
+
+// ─── Savings funds ────────────────────────────────────────────────────────────
+
+export type TipoFondo = 'Emergencia' | 'Ahorro' | 'Meta'
+
+export const TIPOS_FONDO: TipoFondo[] = ['Emergencia', 'Ahorro', 'Meta']
+
+export interface FondoAhorro {
+  id: string
+  nombre: string
+  tipo: TipoFondo
+  objetivo: number // target, positive
+  acumulado: number // current amount, >= 0
+  creadoEn: string // YYYY-MM-DD
+  nota?: string
+  negocioId?: string // undefined = personal
+}
+
+// ─── Financial assets ─────────────────────────────────────────────────────────
+
+export type TipoActivo =
+  | 'Propiedad en renta'
+  | 'Vehículo'
+  | 'Equipamiento'
+  | 'Negocio'
+  | 'Otro'
+
+export const TIPOS_ACTIVO: TipoActivo[] = [
+  'Propiedad en renta',
+  'Vehículo',
+  'Equipamiento',
+  'Negocio',
+  'Otro',
+]
+
+export interface ActivoFinanciero {
+  id: string
+  nombre: string
+  tipo: TipoActivo
+  valor: number // market value, positive
+  ingresoMensual: number // renta que genera, >= 0
+  creadoEn: string // YYYY-MM-DD
+  nota?: string
+  negocioId?: string // undefined = personal
+}
+
+// ─── Business spaces ──────────────────────────────────────────────────────────
+
+export const CATEGORIAS_NEGOCIO = [
+  'Ventas',
+  'Servicios',
+  'Marketing',
+  'Herramientas',
+  'Nómina',
+  'Impuestos',
+  'Logística',
+  'Otro',
+] as const
+
+export type CategoriaNegocio = typeof CATEGORIAS_NEGOCIO[number]
+
+export interface Negocio {
+  id: string
+  nombre: string
+  emoji: string
+  creadoEn: string // YYYY-MM-DD
+}
+
+export interface TransaccionNegocio {
+  id: string
+  negocioId: string
+  fecha: string // YYYY-MM-DD
+  tipo: TipoTransaccion
+  categoria: CategoriaNegocio
+  monto: number // positive number always
+  nota?: string
+}
+
+export interface PresupuestoNegocio {
+  id: string
+  negocioId: string
+  categoria: CategoriaNegocio
+  monto: number // positive
+  mes: string // YYYY-MM
+}
+
 // ─── Dashboards ───────────────────────────────────────────────────────────────
 
 export type WidgetType =
@@ -230,6 +381,13 @@ export interface AppState {
   tareas: Tarea[]
   registrosSemanal: RegistroSemanal[]
   deudas: Deuda[]
+  costosFijos: CostoFijo[]
+  inversiones: Inversion[]
+  fondos: FondoAhorro[]
+  activos: ActivoFinanciero[]
+  negocios: Negocio[]
+  transaccionesNegocio: TransaccionNegocio[]
+  presupuestosNegocio: PresupuestoNegocio[]
   dashboards: Dashboard[]
   perfil: PerfilUsuario | null
   xp: EstadoXP
@@ -259,6 +417,13 @@ export type AppAction =
       dashboards?: Dashboard[]
       logros?: Logro[]
       creditos?: EstadoCreditos
+      costosFijos?: CostoFijo[]
+      inversiones?: Inversion[]
+      fondos?: FondoAhorro[]
+      activos?: ActivoFinanciero[]
+      negocios?: Negocio[]
+      transaccionesNegocio?: TransaccionNegocio[]
+      presupuestosNegocio?: PresupuestoNegocio[]
     } }
   | { type: 'ADD_DIA_ACTIVO'; payload: DiaActivo }
   | { type: 'CHECKIN_HOY'; payload: string }
@@ -280,6 +445,31 @@ export type AppAction =
   | { type: 'ADD_DEUDA'; payload: Deuda }
   | { type: 'EDIT_DEUDA'; payload: Deuda }
   | { type: 'DELETE_DEUDA'; payload: string }
+  // Fixed costs
+  | { type: 'ADD_COSTO_FIJO'; payload: CostoFijo }
+  | { type: 'EDIT_COSTO_FIJO'; payload: CostoFijo }
+  | { type: 'DELETE_COSTO_FIJO'; payload: string }
+  // Investments
+  | { type: 'ADD_INVERSION'; payload: Inversion }
+  | { type: 'EDIT_INVERSION'; payload: Inversion }
+  | { type: 'DELETE_INVERSION'; payload: string }
+  // Savings funds
+  | { type: 'ADD_FONDO'; payload: FondoAhorro }
+  | { type: 'EDIT_FONDO'; payload: FondoAhorro }
+  | { type: 'DELETE_FONDO'; payload: string }
+  // Financial assets
+  | { type: 'ADD_ACTIVO'; payload: ActivoFinanciero }
+  | { type: 'EDIT_ACTIVO'; payload: ActivoFinanciero }
+  | { type: 'DELETE_ACTIVO'; payload: string }
+  // Business spaces
+  | { type: 'ADD_NEGOCIO'; payload: Negocio }
+  | { type: 'EDIT_NEGOCIO'; payload: Negocio }
+  | { type: 'DELETE_NEGOCIO'; payload: string }
+  | { type: 'ADD_TX_NEGOCIO'; payload: TransaccionNegocio }
+  | { type: 'DELETE_TX_NEGOCIO'; payload: string }
+  | { type: 'ADD_PRESUPUESTO_NEGOCIO'; payload: PresupuestoNegocio }
+  | { type: 'EDIT_PRESUPUESTO_NEGOCIO'; payload: PresupuestoNegocio }
+  | { type: 'DELETE_PRESUPUESTO_NEGOCIO'; payload: string }
   // Dashboards
   | { type: 'ADD_DASHBOARD'; payload: Dashboard }
   | { type: 'EDIT_DASHBOARD'; payload: Dashboard }

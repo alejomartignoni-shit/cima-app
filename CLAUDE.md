@@ -80,11 +80,21 @@ npm run lint      # ESLint
 ## UI / Design
 
 - Dark-first: fondo `zinc-950`, cards `zinc-900`, bordes `zinc-800`
-- Acento principal: `emerald-500` (racha activa, acciones positivas)
-- Acento secundario: `rose-500` (gastos, alertas)
-- Sin bordes redondeados excesivos — `rounded-xl` / `rounded-2xl` máximo
-- Animaciones: `transition-all`, `active:scale-95` en botones, `animate-fade-in` en páginas
-- Responsive: mobile-first con `lg:` para desktop. Bottom nav en mobile, sidebar en lg+
+- **Estilo: Duolingo × Phantom** — base dark sleek con acento violeta (`#7c5cfc`/`#ab9ff2`) + juice de juego (oro `#ffd600` para XP/racha)
+- Acento positivo: `emerald-500` (ingresos), negativo: `rose-500` (gastos, alertas)
+- Cards principales `rounded-3xl`; hero cards con clases `card-hero` (violeta) y `card-hero-flame` (fuego)
+- Animaciones: `animate-pop` (bounce), `animate-fade-in` en páginas, `flame-flicker`, confetti
+- Responsive: mobile-first con `lg:` para desktop. Bottom nav flotante en mobile (botón central de Racha elevado), sidebar en lg+
+
+## Game Feel Layer (`src/components/game/`)
+
+- **`GameFeedback.tsx`** — watcher global montado en `AppLayout`. Detecta subas de XP (delta ≤ 100 = acción de usuario; delta mayor = carga demo, se ignora) → toast +XP, ding, vibración. Detecta suba de rango → confetti + fanfarria + `LevelUpModal`.
+- **`JuicyButton.tsx`** — botón 3D estilo Duolingo (`btn-juicy btn-juicy-{gold|emerald|violet|dark}` en `index.css`). Press físico de 4px, pop + háptica.
+- **`Celebration.tsx`** — confetti global. `celebrate({ pieces })` desde cualquier lado (CustomEvent `cima:celebrate`). Se monta una sola vez vía `GameFeedback`.
+- **`CountUp.tsx`** — números animados (balance del Home).
+- **`StreakFlame.tsx`** — llama SVG animada con flicker + glow.
+- **`QuestCard.tsx`** — misiones del día (transacción, check-in, hábito). 100% derivadas del estado, sin persistencia extra.
+- **`src/utils/sound.ts`** — sonidos sintetizados con WebAudio (sin assets): `playDing`, `playPop`, `playFanfare`, `vibrate`. Toggle en Configuración (localStorage `cima-sonidos`).
 
 ## Lo que NO hacer
 

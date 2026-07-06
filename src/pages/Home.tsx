@@ -11,10 +11,17 @@ import {
   ArrowRight,
   CreditCard,
   Target,
+  Flame,
+  Check,
 } from 'lucide-react'
 import { useApp } from '../store/AppContext'
-import { formatearMonto, mesActual, formatearMes, formatearFecha } from '../utils/formatters'
-import { calcularRacha } from '../utils/streakLogic'
+import { formatearMonto, mesActual, formatearMes, formatearFecha, hoy } from '../utils/formatters'
+import { calcularRacha, checkInHechoHoy } from '../utils/streakLogic'
+import { CountUp } from '../components/game/CountUp'
+import { QuestCard } from '../components/game/QuestCard'
+import { Reveal } from '../components/ui/Reveal'
+import { celebrate } from '../components/game/Celebration'
+import { playPop, vibrate } from '../utils/sound'
 import { getRangoInfo, getProgresoRango, getTemporadaActual, getXPTemporada, formatXP, RANGOS } from '../utils/xp'
 import {
   ResponsiveContainer,
@@ -44,11 +51,44 @@ function StatusBadge({ tipo }: { tipo: 'ingreso' | 'gasto' }) {
     : <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-zinc-800 text-zinc-400 border border-zinc-700">Gasto</span>
 }
 
+function QuickAction({
+  icono: Icono,
+  label,
+  variante,
+  onClick,
+  hecho = false,
+}: {
+  icono: typeof Plus
+  label: string
+  variante: 'gold' | 'emerald' | 'violet' | 'dark'
+  onClick: () => void
+  hecho?: boolean
+}) {
+  return (
+    <button
+      onClick={() => { playPop(); vibrate(10); onClick() }}
+      className="flex flex-col items-center gap-2 group"
+    >
+      <span className={`btn-juicy btn-juicy-${hecho ? 'dark' : variante} !rounded-full !p-0 w-14 h-14`}>
+        {hecho ? <Check size={22} strokeWidth={3} className="text-emerald-400" /> : <Icono size={22} strokeWidth={2.5} />}
+      </span>
+      <span className="text-[11px] font-bold text-zinc-400 group-hover:text-zinc-200 transition-colors">{label}</span>
+    </button>
+  )
+}
+
 export function Home() {
-  const { state } = useApp()
+  const { state, dispatch } = useApp()
   const navigate = useNavigate()
   const mes = mesActual()
   const racha = calcularRacha(state.diasActivos, state.transacciones)
+  const checkInHecho = checkInHechoHoy(state.ultimoCheckIn)
+
+  function handleCheckIn() {
+    if (checkInHecho) return
+    dispatch({ type: 'CHECKIN_HOY', payload: hoy() })
+    celebrate({ pieces: 60 })
+  }
 
   const temporada = getTemporadaActual()
   const rangoInfo = getRangoInfo(state.xp.total)
@@ -103,64 +143,59 @@ export function Home() {
     <AppLayout titulo="Dashboard">
       <div className="space-y-4 animate-fade-in">
 
-        {/* ── 1. Balance Hero ─────────────────────────────────────────────── */}
-        <div
-          className="rounded-2xl p-6 relative overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #0d2b1e 0%, #0a1f16 60%, #061410 100%)', border: '1px solid #1a4a30' }}
-        >
-          {/* Subtle glow */}
-          <div className="absolute right-0 top-0 w-64 h-64 rounded-full opacity-10 pointer-events-none"
-            style={{ background: 'radial-gradient(circle, #10b981 0%, transparent 70%)', transform: 'translate(30%, -30%)' }} />
+        {/* ── 1. Wallet Hero (estilo Phantom) ─────────────────────────────── */}
+        <div className="card-hero rounded-3xl p-6 sm:p-8 relative overflow-hidden text-center">
+          <div className="aurora-bg absolute inset-0 opacity-50 pointer-events-none" />
+          <p className="text-zinc-500 text-xs font-bold uppercase tracking-[0.2em] mb-2">
+            Patrimonio total
+          </p>
+          <CountUp
+            value={totalAhorrado}
+            format={formatearMonto}
+            className={`block text-4xl sm:text-5xl font-black tracking-tight ${totalAhorrado >= 0 ? 'text-white' : 'text-rose-400'}`}
+          />
 
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="text-emerald-400/70 text-xs font-semibold uppercase tracking-widest mb-2">
-                Balance — {formatearMes(mesRef)}
-              </p>
-              <p className={`text-3xl sm:text-4xl font-black tracking-tight ${balance >= 0 ? 'text-white' : 'text-rose-400'}`}>
-                {formatearMonto(balance)}
-              </p>
-              {ingresos > 0 && (
-                <div className="flex items-center gap-1.5 mt-2">
-                  <ArrowUpRight size={13} className="text-emerald-400" />
-                  <span className="text-emerald-400 text-sm font-semibold">{tasaAhorro}%</span>
-                  <span className="text-emerald-400/50 text-xs">tasa de ahorro</span>
-                </div>
-              )}
-            </div>
-            <div className="flex gap-2 flex-shrink-0">
-              <button
-                onClick={() => navigate('/transacciones')}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-950 transition-all hover:scale-105 active:scale-95"
-                style={{ background: '#10b981' }}
-              >
-                <Plus size={13} /> Agregar
-              </button>
-              <button
-                onClick={() => navigate('/proyeccion')}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-emerald-300 bg-emerald-500/10 border border-emerald-500/20 transition-all hover:bg-emerald-500/20"
-              >
-                <ArrowRight size={13} /> Proyección
-              </button>
-            </div>
+          {/* Chips del mes */}
+          <div className="flex items-center justify-center gap-2 mt-3 flex-wrap">
+            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${
+              balance >= 0
+                ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+                : 'text-rose-400 bg-rose-500/10 border-rose-500/20'
+            }`}>
+              {balance >= 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+              {formatearMonto(balance)} · {formatearMes(mesRef)}
+            </span>
+            {ingresos > 0 && (
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold text-[#ab9ff2] bg-[#7c5cfc]/10 border border-[#7c5cfc]/25">
+                <Zap size={11} /> {tasaAhorro}% ahorro
+              </span>
+            )}
+          </div>
+
+          {/* Acciones rápidas circulares */}
+          <div className="flex items-start justify-center gap-5 sm:gap-8 mt-6">
+            <QuickAction icono={Plus} label="Agregar" variante="gold" onClick={() => navigate('/transacciones')} />
+            <QuickAction icono={Flame} label={checkInHecho ? 'Hecho ✓' : 'Check-in'} variante="emerald" hecho={checkInHecho} onClick={handleCheckIn} />
+            <QuickAction icono={Target} label="Metas" variante="dark" onClick={() => navigate('/presupuestos')} />
+            <QuickAction icono={TrendingUp} label="Proyección" variante="violet" onClick={() => navigate('/proyeccion')} />
           </div>
 
           {/* Camino al millón */}
           {hayDatos && (
-            <div className="mt-5 pt-4 border-t border-emerald-900/40">
+            <div className="mt-6 pt-4 border-t border-zinc-800/60 text-left">
               <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-1.5 text-xs text-emerald-400/60">
-                  <Target size={11} />
+                <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-semibold">
+                  <Target size={11} className="text-[#ffd600]" />
                   Camino al Millón
                 </div>
-                <span className="text-xs text-emerald-400 font-semibold">{pctHaciaMillon}%</span>
+                <span className="text-xs text-[#ffd600] font-black">{pctHaciaMillon}%</span>
               </div>
-              <div className="h-1.5 bg-black/30 rounded-full overflow-hidden">
+              <div className="h-2 bg-black/40 rounded-full overflow-hidden">
                 <div className="h-full rounded-full transition-all duration-700"
-                  style={{ width: `${pctHaciaMillon}%`, background: 'linear-gradient(90deg, #10b981, #34d399)' }} />
+                  style={{ width: `${pctHaciaMillon}%`, background: 'linear-gradient(90deg, #ffd600, #ff9500)' }} />
               </div>
               {mesesParaMillon !== null && (
-                <p className="text-emerald-400/40 text-xs mt-1.5">
+                <p className="text-zinc-600 text-xs mt-1.5">
                   A este ritmo: {mesesParaMillon} {mesesParaMillon === 1 ? 'mes' : 'meses'} para $1M
                 </p>
               )}
@@ -168,7 +203,13 @@ export function Home() {
           )}
         </div>
 
+        {/* ── 1b. Misiones del día ────────────────────────────────────────── */}
+        <Reveal delay={60}>
+          <QuestCard />
+        </Reveal>
+
         {/* ── 2. Cash Flow + Income/Expense ──────────────────────────────── */}
+        <Reveal>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Cash Flow chart */}
           <div className="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
@@ -252,8 +293,10 @@ export function Home() {
             </div>
           </div>
         </div>
+        </Reveal>
 
         {/* ── 3. Stat cards ──────────────────────────────────────────────── */}
+        <Reveal>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
           {/* Ahorro neto */}
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 sm:p-5">
@@ -305,8 +348,10 @@ export function Home() {
             </div>
           </div>
         </div>
+        </Reveal>
 
         {/* ── 4. Recent Activity + Rank card ─────────────────────────────── */}
+        <Reveal>
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
           {/* Recent activity */}
           <div className="lg:col-span-3 bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden">
@@ -430,6 +475,7 @@ export function Home() {
             </div>
           </div>
         </div>
+        </Reveal>
 
       </div>
     </AppLayout>

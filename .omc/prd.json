@@ -1,0 +1,84 @@
+{
+  "task": "CIMA web cinemática: landing, página de ventas y app completa con estilo Web3 dark (glass, glows, aurora, 3D motion) basado en refs Dribbble crypto + imágenes locales (montaña/oso/auto)",
+  "createdAt": "2026-07-06",
+  "stories": [
+    {
+      "id": "US-001",
+      "title": "Sistema de diseño cinemático (tokens + utilidades + assets)",
+      "passes": true,
+      "acceptanceCriteria": [
+        "tailwind.config.js expone paleta glaciar (cyan/ice) además de violeta/gold existentes, y keyframes nuevos: aurora, kenburns, marquee, orbit, reveal",
+        "index.css tiene utilidades .glass-card, .aurora-bg, .text-gradient-ice, .text-gradient-violet, .glow-ring y clases de reveal-on-scroll (.reveal-up/.reveal-visible)",
+        "Existe src/components/ui/Reveal.tsx: componente IntersectionObserver reutilizable (threshold, delay, direction) sin dependencias nuevas",
+        "Las 3 imágenes de 'visual references' están optimizadas a WebP <300KB c/u en public/cinematic/ (montana.webp, oso.webp, auto.webp) vía script scripts/optimize-cinematic.mjs con sharp",
+        "npm run build compila sin errores"
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "Landing page cinemática (montaña hero + parallax + reveals)",
+      "passes": true,
+      "acceptanceCriteria": [
+        "Hero usa public/cinematic/montana.webp como fondo con efecto Ken Burns lento + gradiente de legibilidad + parallax sutil al scroll",
+        "Todas las secciones bajo el hero usan Reveal (entran animadas al hacer scroll), no animaciones solo-on-load",
+        "Feature cards tienen tilt/hover 3D con glow que sigue el estilo glass (border white/10, backdrop-blur)",
+        "Existe una fila marquee infinita (stats o categorías) con animación CSS pausable con prefers-reduced-motion",
+        "La sección final CTA usa la imagen del oso (oso.webp) como fondo cinemático con overlay",
+        "Nav conserva CTA a /onboarding y aparece link a la página de ventas /pro",
+        "npm run build compila sin errores"
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "Página de ventas /pro (long-form cinemática)",
+      "passes": true,
+      "acceptanceCriteria": [
+        "Existe src/pages/Ventas.tsx registrada como ruta /pro en App.tsx (fuera del OnboardingGuard)",
+        "Estructura de venta completa: hero con promesa, dolor/agitación, presentación del sistema, features Pro con mockups, testimonios, precio con anclaje ($7/mes y anual $59), garantía, FAQ (acordeón animado), CTA final",
+        "Usa auto.webp como fondo cinemático en al menos una sección (overlay + Ken Burns o parallax)",
+        "FAQ es un acordeón accesible (button + aria-expanded) con animación de altura suave",
+        "Todos los CTAs navegan a /onboarding",
+        "npm run build compila sin errores"
+      ]
+    },
+    {
+      "id": "US-004",
+      "title": "App completa: capa cinemática global",
+      "passes": true,
+      "acceptanceCriteria": [
+        "AppLayout monta transición de página: el contenido de cada ruta entra con fade+slide (animación CSS, sin librerías nuevas)",
+        "Sidebar y BottomNav reciben tratamiento glass (backdrop-blur, bordes white/5-10) coherente con la landing, sin romper theme-light",
+        "Home usa Reveal en sus secciones y el hero card principal recibe glow/aurora sutil",
+        "Racha, Temporada y Recompensas reciben reveals de entrada en sus bloques principales",
+        "No se rompe ninguna lógica: streakLogic, AppContext y rutas intactos",
+        "npm run build y npm run lint pasan sin errores"
+      ]
+    },
+    {
+      "id": "US-006",
+      "title": "Dominio nuevo: costos fijos (software/suscripciones) e inversiones",
+      "passes": true,
+      "acceptanceCriteria": [
+        "Tipos CostoFijo (categorías Software/Suscripciones/Vivienda/Servicios/Transporte/Otro, frecuencia mensual/anual, activo) e Inversion (7 tipos, montoInvertido, valorActual) en types/index.ts — VERIFICADO",
+        "Reducer con ADD/EDIT/DELETE para ambos + CARGAR_DEMO + estadoInicial (migración localStorage segura vía spread de defaults) — VERIFICADO",
+        "Página /costos-fijos: hero con total mensual/anual + % de ingresos + desglose por categoría, alta vía Modal, pausar/reactivar, eliminar — VERIFICADO en runtime (alta 'Claude Pro' $20k → total y persistencia OK)",
+        "Página /inversiones: hero portfolio con P&L total ($ y %), barra de distribución por tipo, alta/edición vía Modal, eliminar — VERIFICADO en runtime (alta 'Bitcoin' 100k→135k = +35% OK)",
+        "Sidebar con links Costos fijos + Inversiones, rutas registradas tras OnboardingGuard — VERIFICADO",
+        "Demo data (7 costos fijos, 5 inversiones) cableada a Cargar Demo en Configuración — build OK",
+        "Landing marquee + PRO_FEATURES y Ventas con bloque 'Inversiones y costos fijos' — VERIFICADO",
+        "npm run build (tsc + vite) sin errores — VERIFICADO"
+      ]
+    },
+    {
+      "id": "US-005",
+      "title": "Verificación visual y regresión",
+      "passes": true,
+      "acceptanceCriteria": [
+        "Dev server corre y /landing, /pro y / (app) cargan sin errores de consola",
+        "Screenshot de landing hero, sección de ventas y home de la app como evidencia",
+        "prefers-reduced-motion desactiva marquee/kenburns (verificado en CSS)",
+        "Build de producción final exitoso"
+      ]
+    }
+  ]
+}

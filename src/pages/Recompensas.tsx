@@ -3,6 +3,7 @@ import { AppLayout } from '../components/layout/AppLayout'
 import { useApp } from '../store/AppContext'
 import { LOGROS_DEF, type CategoriaLogro } from '../utils/logros'
 import { getRangoInfo } from '../utils/xp'
+import { Reveal } from '../components/ui/Reveal'
 import { Lock, Maximize2 } from 'lucide-react'
 import type { MerchProductId } from '../components/merch/Merch3DViewer'
 const Merch3DViewer = lazy(() =>
@@ -201,6 +202,7 @@ export function Recompensas() {
         </div>
 
         {/* How to earn */}
+        <Reveal>
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
           <p className="text-zinc-500 text-[10px] font-semibold uppercase tracking-widest mb-4">Cómo ganar Monedas M</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -216,8 +218,10 @@ export function Recompensas() {
             ))}
           </div>
         </div>
+        </Reveal>
 
         {/* Achievements */}
+        <Reveal>
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5">
           <p className="text-zinc-500 text-[10px] font-semibold uppercase tracking-widest mb-4">Logros</p>
 
@@ -284,6 +288,7 @@ export function Recompensas() {
             })}
           </div>
         </div>
+        </Reveal>
 
         {/* Elite Merch */}
         <div className={`border rounded-2xl p-5 ${isElite ? 'bg-gradient-to-br from-[#ffd600]/5 to-zinc-900 border-[#ffd600]/20' : 'bg-zinc-900 border-zinc-800'}`}>

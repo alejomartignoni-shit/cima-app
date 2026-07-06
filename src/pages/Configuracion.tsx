@@ -1,11 +1,14 @@
+import { useState } from 'react'
 import { AppLayout } from '../components/layout/AppLayout'
-import { Settings, Database, Trash2, Download, MonitorDown, CheckCircle } from 'lucide-react'
+import { Settings, Database, Trash2, Download, MonitorDown, CheckCircle, Volume2, VolumeX } from 'lucide-react'
 import { useApp } from '../store/AppContext'
+import { sonidosActivados, setSonidos, playDing } from '../utils/sound'
 import {
   transaccionesDemo, generarDiasActivosDemo, deudasDemo, xpEventosDemo,
   habitosDemo, registrosHabitoDemo, estadosDiaDemo, tareasDemo,
   registrosSemanalesDemo, perfilDemo, presupuestosDemo, dashboardsDemo,
-  logrosDemo, creditosDemo,
+  logrosDemo, creditosDemo, costosFijosDemo, inversionesDemo,
+  fondosDemo, activosDemo, negociosDemo, transaccionesNegocioDemo,
 } from '../utils/demoData'
 import { useInstallPrompt } from '../hooks/useInstallPrompt'
 import { toast } from 'sonner'
@@ -13,6 +16,14 @@ import { toast } from 'sonner'
 export function Configuracion() {
   const { state, dispatch } = useApp()
   const { puedeInstalar, instalada, instalar } = useInstallPrompt()
+  const [sonidos, setSonidosUI] = useState(sonidosActivados())
+
+  function toggleSonidos() {
+    const nuevo = !sonidos
+    setSonidos(nuevo)
+    setSonidosUI(nuevo)
+    if (nuevo) playDing()
+  }
 
   function cargarDemoData() {
     dispatch({
@@ -33,6 +44,12 @@ export function Configuracion() {
         dashboards: dashboardsDemo,
         logros: logrosDemo,
         creditos: creditosDemo,
+        costosFijos: costosFijosDemo,
+        inversiones: inversionesDemo,
+        fondos: fondosDemo,
+        activos: activosDemo,
+        negocios: negociosDemo,
+        transaccionesNegocio: transaccionesNegocioDemo,
       },
     })
     toast.success('¡Datos de ejemplo cargados!', {
@@ -98,6 +115,33 @@ export function Configuracion() {
               <h3 className="text-white font-medium text-sm">Configuración general</h3>
             </div>
             <p className="text-zinc-500 text-xs pl-7">CIMA v0.1 — Datos guardados localmente en tu dispositivo</p>
+          </div>
+
+          <div className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {sonidos
+                ? <Volume2 size={16} className="text-[#ffd600]" />
+                : <VolumeX size={16} className="text-zinc-500" />
+              }
+              <div>
+                <h3 className="text-white font-medium text-sm">Sonidos del juego</h3>
+                <p className="text-zinc-500 text-xs">Dings de XP, fanfarrias y efectos al tocar</p>
+              </div>
+            </div>
+            <button
+              onClick={toggleSonidos}
+              role="switch"
+              aria-checked={sonidos}
+              className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${
+                sonidos ? 'bg-[#ffd600]' : 'bg-zinc-700'
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                  sonidos ? 'translate-x-[22px]' : 'translate-x-0.5'
+                }`}
+              />
+            </button>
           </div>
         </div>
 

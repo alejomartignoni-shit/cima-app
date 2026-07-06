@@ -21,6 +21,13 @@ const estadoInicial: AppState = {
   tareas: [],
   registrosSemanal: [],
   deudas: [],
+  costosFijos: [],
+  inversiones: [],
+  fondos: [],
+  activos: [],
+  negocios: [],
+  transaccionesNegocio: [],
+  presupuestosNegocio: [],
   dashboards: [],
   perfil: null,
   xp: xpInicial,
@@ -156,6 +163,13 @@ function reducerCore(state: AppState, action: AppAction): AppState {
         dashboards: action.payload.dashboards ?? state.dashboards,
         logros: action.payload.logros ?? state.logros,
         creditos: action.payload.creditos ?? state.creditos,
+        costosFijos: action.payload.costosFijos ?? state.costosFijos,
+        inversiones: action.payload.inversiones ?? state.inversiones,
+        fondos: action.payload.fondos ?? state.fondos,
+        activos: action.payload.activos ?? state.activos,
+        negocios: action.payload.negocios ?? state.negocios,
+        transaccionesNegocio: action.payload.transaccionesNegocio ?? state.transaccionesNegocio,
+        presupuestosNegocio: action.payload.presupuestosNegocio ?? state.presupuestosNegocio,
         xp: xpFromDemo.length > 0
           ? { total: xpTotal, historial: xpFromDemo.slice(-100) }
           : state.xp,
@@ -315,6 +329,84 @@ function reducerCore(state: AppState, action: AppAction): AppState {
 
     case 'DELETE_DEUDA':
       return { ...state, deudas: state.deudas.filter(d => d.id !== action.payload) }
+
+    // ─── Fixed costs ──────────────────────────────────────────────────────
+    case 'ADD_COSTO_FIJO':
+      return { ...state, costosFijos: [...state.costosFijos, action.payload] }
+
+    case 'EDIT_COSTO_FIJO':
+      return {
+        ...state,
+        costosFijos: state.costosFijos.map(c => c.id === action.payload.id ? action.payload : c),
+      }
+
+    case 'DELETE_COSTO_FIJO':
+      return { ...state, costosFijos: state.costosFijos.filter(c => c.id !== action.payload) }
+
+    // ─── Investments ──────────────────────────────────────────────────────
+    case 'ADD_INVERSION':
+      return { ...state, inversiones: [...state.inversiones, action.payload] }
+
+    case 'EDIT_INVERSION':
+      return {
+        ...state,
+        inversiones: state.inversiones.map(i => i.id === action.payload.id ? action.payload : i),
+      }
+
+    case 'DELETE_INVERSION':
+      return { ...state, inversiones: state.inversiones.filter(i => i.id !== action.payload) }
+
+    // ─── Savings funds ────────────────────────────────────────────────────
+    case 'ADD_FONDO':
+      return { ...state, fondos: [...state.fondos, action.payload] }
+
+    case 'EDIT_FONDO':
+      return {
+        ...state,
+        fondos: state.fondos.map(f => f.id === action.payload.id ? action.payload : f),
+      }
+
+    case 'DELETE_FONDO':
+      return { ...state, fondos: state.fondos.filter(f => f.id !== action.payload) }
+
+    // ─── Financial assets ─────────────────────────────────────────────────
+    case 'ADD_ACTIVO':
+      return { ...state, activos: [...state.activos, action.payload] }
+
+    case 'EDIT_ACTIVO':
+      return {
+        ...state,
+        activos: state.activos.map(a => a.id === action.payload.id ? action.payload : a),
+      }
+
+    case 'DELETE_ACTIVO':
+      return { ...state, activos: state.activos.filter(a => a.id !== action.payload) }
+
+    // ─── Business spaces ──────────────────────────────────────────────────
+    case 'ADD_NEGOCIO':
+      return { ...state, negocios: [...state.negocios, action.payload] }
+
+    case 'EDIT_NEGOCIO':
+      return {
+        ...state,
+        negocios: state.negocios.map(n => n.id === action.payload.id ? action.payload : n),
+      }
+
+    case 'DELETE_NEGOCIO':
+      return {
+        ...state,
+        negocios: state.negocios.filter(n => n.id !== action.payload),
+        transaccionesNegocio: state.transaccionesNegocio.filter(t => t.negocioId !== action.payload),
+      }
+
+    case 'ADD_TX_NEGOCIO':
+      return { ...state, transaccionesNegocio: [...state.transaccionesNegocio, action.payload] }
+
+    case 'DELETE_TX_NEGOCIO':
+      return {
+        ...state,
+        transaccionesNegocio: state.transaccionesNegocio.filter(t => t.id !== action.payload),
+      }
 
     // ─── Dashboards ───────────────────────────────────────────────────────
     case 'ADD_DASHBOARD':

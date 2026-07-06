@@ -2,7 +2,8 @@ import { subDays, subMonths, format, startOfMonth, startOfWeek, subWeeks, addDay
 import type {
   Transaccion, DiaActivo, Deuda, EventoXP, Presupuesto,
   Habito, RegistroHabito, EstadoDia, Tarea, RegistroSemanal, PerfilUsuario, Dashboard,
-  Logro, EstadoCreditos,
+  Logro, EstadoCreditos, CostoFijo, Inversion,
+  FondoAhorro, ActivoFinanciero, Negocio, TransaccionNegocio,
 } from '../types'
 
 function fechaDias(diasAtras: number): string {
@@ -801,3 +802,60 @@ export const creditosDemo: EstadoCreditos = {
     { fecha: fechaDias(60), cantidad: 3000,  motivo: '🏆 ¡Zafiro desbloqueado!' },
   ],
 }
+
+// ─── Fixed costs demo ─────────────────────────────────────────────────────────
+
+export const costosFijosDemo: CostoFijo[] = [
+  { id: 'cf-1', nombre: 'Alquiler',        categoria: 'Vivienda',      monto: 220_000, frecuencia: 'mensual', activo: true,  creadoEn: fechaDias(180) },
+  { id: 'cf-2', nombre: 'Claude Pro',      categoria: 'Software',      monto: 20_000,  frecuencia: 'mensual', activo: true,  creadoEn: fechaDias(120), nota: 'Herramienta de trabajo' },
+  { id: 'cf-3', nombre: 'Notion Plus',     categoria: 'Software',      monto: 9_500,   frecuencia: 'mensual', activo: true,  creadoEn: fechaDias(90) },
+  { id: 'cf-4', nombre: 'Spotify',         categoria: 'Suscripciones', monto: 5_800,   frecuencia: 'mensual', activo: true,  creadoEn: fechaDias(300) },
+  { id: 'cf-5', nombre: 'Netflix',         categoria: 'Suscripciones', monto: 7_900,   frecuencia: 'mensual', activo: false, creadoEn: fechaDias(400), nota: 'Pausado — no lo usaba' },
+  { id: 'cf-6', nombre: 'Internet fibra',  categoria: 'Servicios',     monto: 28_000,  frecuencia: 'mensual', activo: true,  creadoEn: fechaDias(365) },
+  { id: 'cf-7', nombre: 'Dominio .com',    categoria: 'Software',      monto: 18_000,  frecuencia: 'anual',   activo: true,  creadoEn: fechaDias(200) },
+]
+
+// ─── Investments demo ─────────────────────────────────────────────────────────
+
+export const inversionesDemo: Inversion[] = [
+  { id: 'inv-1', nombre: 'Bitcoin',            tipo: 'Cripto',      montoInvertido: 350_000, valorActual: 512_000, fecha: fechaDias(240), nota: 'DCA semanal' },
+  { id: 'inv-2', nombre: 'CEDEAR AAPL',        tipo: 'CEDEARs',     montoInvertido: 180_000, valorActual: 214_000, fecha: fechaDias(150) },
+  { id: 'inv-3', nombre: 'Plazo fijo Galicia', tipo: 'Plazo fijo',  montoInvertido: 200_000, valorActual: 231_000, fecha: fechaDias(60) },
+  { id: 'inv-4', nombre: 'USDT',               tipo: 'Dólar',       montoInvertido: 150_000, valorActual: 168_000, fecha: fechaDias(90), nota: 'Reserva de emergencia' },
+  { id: 'inv-5', nombre: 'ETH',                tipo: 'Cripto',      montoInvertido: 120_000, valorActual: 104_000, fecha: fechaDias(45) },
+]
+
+// ─── Savings funds demo ───────────────────────────────────────────────────────
+
+export const fondosDemo: FondoAhorro[] = [
+  { id: 'fon-1', nombre: 'Fondo de emergencia', tipo: 'Emergencia', objetivo: 1_800_000, acumulado: 1_150_000, creadoEn: fechaDias(200) },
+  { id: 'fon-2', nombre: 'Viaje a Brasil',      tipo: 'Meta',       objetivo: 600_000,   acumulado: 420_000,   creadoEn: fechaDias(90) },
+  { id: 'fon-3', nombre: 'Ahorro general',      tipo: 'Ahorro',     objetivo: 2_000_000, acumulado: 680_000,   creadoEn: fechaDias(150) },
+]
+
+// ─── Financial assets demo ────────────────────────────────────────────────────
+
+export const activosDemo: ActivoFinanciero[] = [
+  { id: 'act-1', nombre: 'Depto Nueva Córdoba', tipo: 'Propiedad en renta', valor: 48_000_000, ingresoMensual: 380_000, creadoEn: fechaDias(400), nota: 'Alquilado hasta dic' },
+  { id: 'act-2', nombre: 'Setup de grabación',  tipo: 'Equipamiento',       valor: 2_400_000,  ingresoMensual: 0,       creadoEn: fechaDias(120) },
+]
+
+// ─── Business spaces demo ─────────────────────────────────────────────────────
+
+export const negociosDemo: Negocio[] = [
+  { id: 'neg-1', nombre: 'Agencia IA',   emoji: '🤖', creadoEn: fechaDias(180) },
+  { id: 'neg-2', nombre: 'Setter Fidel', emoji: '💬', creadoEn: fechaDias(120) },
+]
+
+export const transaccionesNegocioDemo: TransaccionNegocio[] = [
+  { id: 'txn-1',  negocioId: 'neg-1', fecha: fechaDias(3),  tipo: 'ingreso', categoria: 'Servicios',    monto: 850_000, nota: 'Cliente automatización' },
+  { id: 'txn-2',  negocioId: 'neg-1', fecha: fechaDias(6),  tipo: 'gasto',   categoria: 'Herramientas', monto: 45_000,  nota: 'APIs y hosting' },
+  { id: 'txn-3',  negocioId: 'neg-1', fecha: fechaDias(12), tipo: 'ingreso', categoria: 'Servicios',    monto: 620_000, nota: 'Retainer mensual' },
+  { id: 'txn-4',  negocioId: 'neg-1', fecha: fechaDias(18), tipo: 'gasto',   categoria: 'Marketing',    monto: 120_000, nota: 'Ads' },
+  { id: 'txn-5',  negocioId: 'neg-1', fecha: fechaDias(35), tipo: 'ingreso', categoria: 'Servicios',    monto: 780_000 },
+  { id: 'txn-6',  negocioId: 'neg-1', fecha: fechaDias(48), tipo: 'gasto',   categoria: 'Herramientas', monto: 52_000 },
+  { id: 'txn-7',  negocioId: 'neg-2', fecha: fechaDias(2),  tipo: 'ingreso', categoria: 'Ventas',       monto: 450_000, nota: 'Comisión cierre' },
+  { id: 'txn-8',  negocioId: 'neg-2', fecha: fechaDias(9),  tipo: 'ingreso', categoria: 'Ventas',       monto: 380_000, nota: 'Comisión cierre' },
+  { id: 'txn-9',  negocioId: 'neg-2', fecha: fechaDias(15), tipo: 'gasto',   categoria: 'Herramientas', monto: 28_000,  nota: 'ManyChat' },
+  { id: 'txn-10', negocioId: 'neg-2', fecha: fechaDias(40), tipo: 'ingreso', categoria: 'Ventas',       monto: 510_000 },
+]

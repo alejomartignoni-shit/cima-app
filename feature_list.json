@@ -62,6 +62,13 @@
       "description": "utils/xp.ts — sistema de puntos de experiencia.",
       "status": "unknown",
       "evidence": "xp.ts existe — no documentado en CLAUDE.md original."
+    },
+    {
+      "id": "feat-010",
+      "name": "Game Feel Layer (Duolingo × Phantom)",
+      "description": "GameFeedback global (XP toasts + level-up modal + confetti), JuicyButton 3D, CountUp, StreakFlame animada, QuestCard misiones diarias, sonidos WebAudio con toggle, bottom nav flotante con botón central de racha, Home estilo wallet Phantom, Racha estilo Duolingo.",
+      "status": "done",
+      "evidence": "src/components/game/*, src/utils/sound.ts, verificado en preview 2026-07-05: check-in dispara toast +5 XP, confetti, llama encendida, misiones actualizan. Build de producción pasa."
     }
   ]
 }

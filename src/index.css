@@ -53,6 +53,139 @@
   }
 }
 
+/* ─── Game Feel: botones juicy (Duolingo-style 3D press) ─────────────────── */
+
+.btn-juicy {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 20px;
+  border-radius: 16px;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  user-select: none;
+  -webkit-user-select: none;
+  transform: translateY(0);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.15s ease;
+  will-change: transform;
+}
+.btn-juicy:active:not(:disabled) {
+  transform: translateY(4px);
+  box-shadow: 0 0 0 0 transparent !important;
+}
+.btn-juicy:hover:not(:disabled) { filter: brightness(1.08); }
+
+.btn-juicy-gold    { background: #ffd600; color: #1c1600; box-shadow: 0 4px 0 #a88f00; }
+.btn-juicy-emerald { background: #10b981; color: #03130c; box-shadow: 0 4px 0 #087f56; }
+.btn-juicy-violet  { background: #7c5cfc; color: #ffffff; box-shadow: 0 4px 0 #5232cc; }
+.btn-juicy-dark    { background: #26262b; color: #e4e4e7; box-shadow: 0 4px 0 #131316; border: 1px solid #3f3f46; }
+
+.btn-juicy:disabled {
+  background: #1f1f23;
+  color: #71717a;
+  box-shadow: 0 4px 0 #121215;
+  cursor: not-allowed;
+  border: 1px solid #2b2b30;
+}
+
+/* ─── Game Feel: hero cards ──────────────────────────────────────────────── */
+
+.card-hero {
+  background:
+    radial-gradient(circle at 18% -12%, rgba(124, 92, 252, 0.28), transparent 55%),
+    radial-gradient(circle at 88% 118%, rgba(255, 214, 0, 0.12), transparent 50%),
+    linear-gradient(160deg, #16142a 0%, #0d0c14 55%, #09090b 100%);
+  border: 1px solid rgba(124, 92, 252, 0.28);
+}
+
+.card-hero-flame {
+  background:
+    radial-gradient(circle at 50% -20%, rgba(255, 149, 0, 0.22), transparent 60%),
+    radial-gradient(circle at 50% 120%, rgba(255, 214, 0, 0.08), transparent 55%),
+    linear-gradient(175deg, #1c1408 0%, #0e0b06 55%, #09090b 100%);
+  border: 1px solid rgba(255, 178, 0, 0.28);
+}
+
+.text-fire {
+  background: linear-gradient(180deg, #ffd600 10%, #ff9500 65%, #ff6a00 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ─── Game Feel: llama animada ───────────────────────────────────────────── */
+
+.flame-glow {
+  filter: drop-shadow(0 0 16px rgba(255, 150, 0, 0.5)) drop-shadow(0 0 40px rgba(255, 214, 0, 0.22));
+}
+.flame-flicker {
+  transform-origin: 50% 88%;
+  animation: flameFlicker 1.6s ease-in-out infinite;
+}
+.flame-flicker-fast {
+  transform-origin: 50% 88%;
+  animation: flameFlicker 1.05s ease-in-out infinite reverse;
+}
+@keyframes flameFlicker {
+  0%, 100% { transform: scaleY(1)    scaleX(1)    rotate(0deg); }
+  25%      { transform: scaleY(1.05) scaleX(0.97) rotate(-1.2deg); }
+  50%      { transform: scaleY(0.96) scaleX(1.03) rotate(1deg); }
+  75%      { transform: scaleY(1.03) scaleX(0.98) rotate(-0.6deg); }
+}
+
+/* ─── Game Feel: confetti ────────────────────────────────────────────────── */
+
+.confetti-piece {
+  position: fixed;
+  top: 0;
+  pointer-events: none;
+  z-index: 9998;
+  animation: confettiFall var(--dur) cubic-bezier(0.25, 0.46, 0.45, 0.94) var(--delay) both;
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(-6vh) translateX(0) rotate(0deg); opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateY(108vh) translateX(var(--sway)) rotate(var(--spin)); opacity: 0.5; }
+}
+
+/* ─── Game Feel: XP toast ────────────────────────────────────────────────── */
+
+.xp-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #1e1a08 0%, #131311 100%);
+  border: 1px solid rgba(255, 214, 0, 0.4);
+  border-radius: 16px;
+  padding: 12px 18px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.55), 0 0 22px rgba(255, 214, 0, 0.12);
+  animation: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ─── Game Feel: level-up rays ───────────────────────────────────────────── */
+
+.levelup-rays {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 14deg,   rgba(255, 214, 0, 0.10) 14deg 26deg,
+    transparent 26deg 44deg,  rgba(255, 214, 0, 0.10) 44deg 56deg,
+    transparent 56deg 74deg,  rgba(255, 214, 0, 0.10) 74deg 86deg,
+    transparent 86deg 104deg, rgba(255, 214, 0, 0.10) 104deg 116deg,
+    transparent 116deg 134deg,rgba(255, 214, 0, 0.10) 134deg 146deg,
+    transparent 146deg 164deg,rgba(255, 214, 0, 0.10) 164deg 176deg,
+    transparent 176deg 194deg,rgba(255, 214, 0, 0.10) 194deg 206deg,
+    transparent 206deg 224deg,rgba(255, 214, 0, 0.10) 224deg 236deg,
+    transparent 236deg 254deg,rgba(255, 214, 0, 0.10) 254deg 266deg,
+    transparent 266deg 284deg,rgba(255, 214, 0, 0.10) 284deg 296deg,
+    transparent 296deg 314deg,rgba(255, 214, 0, 0.10) 314deg 326deg,
+    transparent 326deg 344deg,rgba(255, 214, 0, 0.10) 344deg 356deg,
+    transparent 356deg 360deg
+  );
+}
+
 /* ─── Cinematic Landing ─────��────────────────────────────────────────────────── */
 
 /* Grain / film noise overlay */
@@ -151,6 +284,118 @@
   border-radius: inherit;
 }
 
+/* ─── Cinematic v2: glass · aurora · reveals ────────────────────────────────── */
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.glass-card-hover {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.5s ease, box-shadow 0.5s ease;
+}
+.glass-card-hover:hover {
+  transform: translateY(-6px);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(124, 92, 252, 0.12);
+}
+
+.aurora-bg {
+  background-image:
+    radial-gradient(ellipse 60% 50% at 20% 30%, rgba(124, 92, 252, 0.16), transparent 65%),
+    radial-gradient(ellipse 50% 45% at 80% 20%, rgba(56, 189, 248, 0.12), transparent 65%),
+    radial-gradient(ellipse 55% 50% at 50% 90%, rgba(255, 214, 0, 0.07), transparent 65%);
+  background-size: 160% 160%, 160% 160%, 160% 160%;
+  animation: aurora 16s ease-in-out infinite alternate;
+}
+
+.text-gradient-ice {
+  background: linear-gradient(100deg, #e0f2fe 0%, #7dd3fc 45%, #38bdf8 75%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-violet {
+  background: linear-gradient(100deg, #c4b5fd 0%, #7c5cfc 55%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.glow-ring {
+  box-shadow: 0 0 0 1px rgba(124, 92, 252, 0.3), 0 0 30px rgba(124, 92, 252, 0.2), 0 0 80px rgba(56, 189, 248, 0.08);
+}
+
+/* Ken Burns background layer */
+.kenburns-layer {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  animation: kenburns 32s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* Reveal on scroll (activado por Reveal.tsx) */
+.reveal-up,
+.reveal-left,
+.reveal-right,
+.reveal-scale {
+  opacity: 0;
+  transition:
+    opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.reveal-up    { transform: translateY(40px); }
+.reveal-left  { transform: translateX(-40px); }
+.reveal-right { transform: translateX(40px); }
+.reveal-scale { transform: scale(0.92); }
+
+.reveal-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Marquee infinito */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 32s linear infinite;
+}
+.marquee-mask {
+  mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, black 12%, black 88%, transparent);
+}
+
+/* Transición de página en la app */
+.page-enter {
+  animation: pageEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes pageEnter {
+  0%   { opacity: 0; transform: translateY(14px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kenburns-layer,
+  .marquee-track,
+  .aurora-bg {
+    animation: none !important;
+  }
+  .reveal-up, .reveal-left, .reveal-right, .reveal-scale {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .page-enter {
+    animation: none;
+  }
+}
+
 /* ─── Light mode overrides ─────────────────────────────────────────────────── */
 html.theme-light .bg-zinc-950 { background-color: #f2f2f2 !important; }
 html.theme-light .bg-zinc-900 { background-color: #ffffff !important; }
@@ -181,7 +426,28 @@ html.theme-light .bg-zinc-800\/40 { background-color: rgba(235,235,235,0.7) !imp
 
 /* Sidebar light mode */
 html.theme-light aside.bg-zinc-900 { background-color: #ffffff !important; border-color: #e0e0e0 !important; }
+html.theme-light .bg-zinc-900\/70 { background-color: rgba(255,255,255,0.88) !important; border-color: #e0e0e0 !important; }
+html.theme-light .border-white\/5,
+html.theme-light .border-white\/10 { border-color: #e0e0e0 !important; }
+html.theme-light .glass-card { background: #ffffff; border-color: #e4e4e7; }
 
 /* Scrollbar light */
 html.theme-light ::-webkit-scrollbar-track { background: #f2f2f2; }
 html.theme-light ::-webkit-scrollbar-thumb { background: #cccccc; }
+
+/* Game feel light */
+html.theme-light .card-hero {
+  background:
+    radial-gradient(circle at 18% -12%, rgba(124, 92, 252, 0.14), transparent 55%),
+    radial-gradient(circle at 88% 118%, rgba(255, 180, 0, 0.10), transparent 50%),
+    linear-gradient(160deg, #f6f4ff 0%, #ffffff 60%, #ffffff 100%);
+  border-color: rgba(124, 92, 252, 0.25);
+}
+html.theme-light .card-hero-flame {
+  background:
+    radial-gradient(circle at 50% -20%, rgba(255, 149, 0, 0.14), transparent 60%),
+    linear-gradient(175deg, #fff8ec 0%, #ffffff 60%, #ffffff 100%);
+  border-color: rgba(255, 178, 0, 0.35);
+}
+html.theme-light .btn-juicy-dark { background: #ffffff; color: #333; box-shadow: 0 4px 0 #cfcfcf; border-color: #ddd; }
+html.theme-light .xp-toast { background: #fffdf2; border-color: rgba(200, 160, 0, 0.4); }

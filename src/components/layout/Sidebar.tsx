@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Home, ArrowLeftRight, Flame, PieChart, Settings, CheckSquare, ListChecks, CalendarDays, Trophy, TrendingUp, Sun, Moon, LayoutDashboard, Gift } from 'lucide-react'
+import { Home, ArrowLeftRight, Flame, PieChart, Settings, CheckSquare, ListChecks, CalendarDays, Trophy, TrendingUp, Sun, Moon, LayoutDashboard, Gift, Receipt, Coins, PiggyBank, Waves, Briefcase } from 'lucide-react'
 import { useApp } from '../../store/AppContext'
 import { useTheme } from '../../store/ThemeContext'
 import { calcularRacha } from '../../utils/streakLogic'
@@ -11,8 +11,18 @@ const navGroups = [
     items: [
       { to: '/', icon: Home, label: 'Inicio', exact: true },
       { to: '/transacciones', icon: ArrowLeftRight, label: 'Transacciones' },
+      { to: '/cashflow', icon: Waves, label: 'Cashflow' },
+    ],
+  },
+  {
+    label: 'Finanzas',
+    items: [
       { to: '/presupuestos', icon: PieChart, label: 'Presupuestos & Deudas' },
+      { to: '/costos-fijos', icon: Receipt, label: 'Costos fijos' },
+      { to: '/ahorros', icon: PiggyBank, label: 'Ahorros & Fondos' },
+      { to: '/inversiones', icon: Coins, label: 'Inversiones & Activos' },
       { to: '/proyeccion', icon: TrendingUp, label: 'Proyección' },
+      { to: '/negocios', icon: Briefcase, label: 'Negocios' },
     ],
   },
   {
@@ -42,7 +52,7 @@ export function Sidebar() {
   const progreso = getProgresoRango(state.xp.total)
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 min-h-screen bg-zinc-900 border-r border-zinc-800 fixed left-0 top-0 bottom-0 z-30">
+    <aside className="hidden lg:flex flex-col w-64 min-h-screen bg-zinc-900/70 backdrop-blur-xl border-r border-white/5 fixed left-0 top-0 bottom-0 z-30">
       {/* Logo */}
       <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-800">
         <div className="flex items-center gap-3">

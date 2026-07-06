@@ -33,7 +33,13 @@ import { Onboarding } from './pages/Onboarding'
 import { Proyeccion } from './pages/Proyeccion'
 import { Dashboards } from './pages/Dashboards'
 import { Recompensas } from './pages/Recompensas'
+import { CostosFijos } from './pages/CostosFijos'
+import { Inversiones } from './pages/Inversiones'
+import { Ahorros } from './pages/Ahorros'
+import { Cashflow } from './pages/Cashflow'
+import { Negocios } from './pages/Negocios'
 import { Landing } from './pages/Landing'
+import { Ventas } from './pages/Ventas'
 import { Entrar } from './pages/Entrar'
 
 function OnboardingGuard({ children }: { children: React.ReactNode }) {
@@ -61,12 +67,18 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/landing" element={<Landing />} />
+      <Route path="/pro" element={<Ventas />} />
       <Route path="/entrar" element={<Entrar />} />
       <Route path="/onboarding" element={<Onboarding />} />
       <Route path="/" element={<OnboardingGuard><Home /></OnboardingGuard>} />
       <Route path="/transacciones" element={<OnboardingGuard><Transacciones /></OnboardingGuard>} />
       <Route path="/racha" element={<OnboardingGuard><Racha /></OnboardingGuard>} />
       <Route path="/presupuestos" element={<OnboardingGuard><Presupuestos /></OnboardingGuard>} />
+      <Route path="/costos-fijos" element={<OnboardingGuard><CostosFijos /></OnboardingGuard>} />
+      <Route path="/inversiones" element={<OnboardingGuard><Inversiones /></OnboardingGuard>} />
+      <Route path="/ahorros" element={<OnboardingGuard><Ahorros /></OnboardingGuard>} />
+      <Route path="/cashflow" element={<OnboardingGuard><Cashflow /></OnboardingGuard>} />
+      <Route path="/negocios" element={<OnboardingGuard><Negocios /></OnboardingGuard>} />
       <Route path="/habitos" element={<OnboardingGuard><Habitos /></OnboardingGuard>} />
       <Route path="/tareas" element={<OnboardingGuard><Tareas /></OnboardingGuard>} />
       <Route path="/semanal" element={<OnboardingGuard><Semanal /></OnboardingGuard>} />
